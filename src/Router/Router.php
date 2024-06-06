@@ -26,7 +26,7 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         error_log("URI: $uri");
-        $base_path = '/drophere-restapi/public';
+        $base_path = '/public';
         error_log("Base path: $base_path");
         $uri = substr($uri, strlen($base_path));
         error_log("URI after base path removal: $uri");
