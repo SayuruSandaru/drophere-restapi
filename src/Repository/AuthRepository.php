@@ -12,6 +12,7 @@ class AuthRepository
 
     public function __construct()
     {
+        error_log("Accessing Db instance via AuthRepo");
         $this->DB = getDBConnection();
     }
 
