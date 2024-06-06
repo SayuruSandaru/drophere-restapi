@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use Exception;
 
-require_once __DIR__ . '/../utility/DBconfig.php';
+require_once __DIR__ . '/../Utility/DBconfig.php';
 
 class AuthRepository
 {
