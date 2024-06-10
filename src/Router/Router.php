@@ -25,8 +25,11 @@ class Router
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $base_path = '/public';
+        echo "URI: $uri\n";
+        $base_path = '/drophere-restapi';
+        echo "Base Path: $base_path\n";
         $uri = substr($uri, strlen($base_path));
+        echo "URI: $uri\n";
         $handlerFound = false;
         foreach ($this->middleware as $middleware) {
             if (!$middleware->handle($_REQUEST, function () use (&$handlerFound, $method, $uri) {
