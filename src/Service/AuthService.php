@@ -77,6 +77,7 @@ class AuthService
     public function register($username, $password, $firstname, $lastname, $email, $phone)
     {
         try {
+
             $user = $this->authenticationRepository->register($email, $password, $firstname, $lastname, $username, $phone,);
             if ($user !== NULL) {
                 return [
