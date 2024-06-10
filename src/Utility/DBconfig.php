@@ -19,6 +19,6 @@ function getDBConnection()
         error_log('Connection failed: ' . mysqli_connect_error());
         return false;
     }
-    echo "Connected to MySQL with SSL\n";
+
     return $conn;
 }

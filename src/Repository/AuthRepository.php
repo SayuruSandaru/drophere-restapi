@@ -47,10 +47,9 @@ class AuthRepository
     public function register($email, $password, $firstname, $lastname, $username, $phone)
     {
         try {
-            echo "Registering user\n";
             $stmt = $this->DB->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
             if ($stmt === false) {
-                throw new Exception('Prepare failed: ' . htmlspecialchars($this->DB->error));
+                throw new Exception('Prepare failed": ' . htmlspecialchars($this->DB->error));
             }
             $stmt->bind_param("ss", $email, $username);
             $stmt->execute();
