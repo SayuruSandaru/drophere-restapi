@@ -12,20 +12,14 @@ class AuthRepository
 
     public function __construct()
     {
-        error_log("Accessing Db instance via AuthRepo");
+
         $this->DB = getDBConnection();
-        if (!$this->DB) {
-            throw new Exception('Failed to connect to the database');
-        }
     }
 
     public function login($email, $password)
     {
         try {
             $stmt = $this->DB->prepare("SELECT * FROM users WHERE email = ?");
-            if ($stmt === false) {
-                throw new Exception('Prepare failed: ' . htmlspecialchars($this->DB->error));
-            }
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -44,12 +38,15 @@ class AuthRepository
         }
     }
 
-    public function register($email, $password, $firstname, $lastname, $username, $phone)
+
+    public function register($email, $password, $firstname, $lastname, $username, $phone, $profile_image)
     {
         try {
+            // echo "email: $email, password: $password, firstname: $firstname, \nlastname: $lastname, username: $username, phone: $phone,\n profile_image: $profile_image";
             $stmt = $this->DB->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
+            // echo "stmt: $stmt->error";
             if ($stmt === false) {
-                throw new Exception('Prepare failed": ' . htmlspecialchars($this->DB->error));
+                throw new Exception('Prepare failed: ' . htmlspecialchars($this->DB->error));
             }
             $stmt->bind_param("ss", $email, $username);
             $stmt->execute();
@@ -59,12 +56,11 @@ class AuthRepository
             }
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt = $this->DB->prepare("INSERT INTO users (email, password, firstname, lastname, username, phone) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt = $this->DB->prepare("INSERT INTO users (email, password, firstname, lastname, username, phone, profile_image) VALUES (?, ?, ?, ?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . htmlspecialchars($this->DB->error));
             }
-
-            $stmt->bind_param("ssssss", $email, $hashedPassword, $firstname, $lastname, $username, $phone);
+            $stmt->bind_param("sssssss", $email, $hashedPassword, $firstname, $lastname, $username, $phone, $profile_image);
             $stmt->execute();
             $result = $stmt->insert_id;
 

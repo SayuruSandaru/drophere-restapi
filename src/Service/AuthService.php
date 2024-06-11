@@ -21,7 +21,7 @@ class AuthService
         $issuedAt = time();
         $expirationTime = $issuedAt + 3600 * 24;
         $payload = array(
-            'userid' => $user['userid'],
+            'userid' => $user['id'],
             'email' => $user['email'],
             'firstname' => $user['firstname'],
             'lastname' => $user['lastname'],
@@ -74,11 +74,10 @@ class AuthService
         }
     }
 
-    public function register($username, $password, $firstname, $lastname, $email, $phone)
+    public function register($username, $password, $firstname, $lastname, $email, $phone, $profile_image)
     {
         try {
-
-            $user = $this->authenticationRepository->register($email, $password, $firstname, $lastname, $username, $phone,);
+            $user = $this->authenticationRepository->register($email, $password, $firstname, $lastname, $username, $phone, $profile_image);
             if ($user !== NULL) {
                 return [
                     "status" => true,

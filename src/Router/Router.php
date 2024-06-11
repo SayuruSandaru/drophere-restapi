@@ -5,43 +5,43 @@ namespace App\Router;
 class Router
 {
     private $routes = [];
-    private $middleware = [];
-    public function addMiddleware($middleware)
+
+    public function post($uri, $middlewares, $callback)
     {
-        $this->middleware[] = $middleware;
+        $this->addRoute('POST', $uri, $middlewares, $callback);
     }
 
-    public function get($path, $callback)
+    private function addRoute($method, $uri, $middlewares, $callback)
     {
-        $this->routes['GET'][$path] = $callback;
+        $this->routes[$method][$uri] = [
+            'middlewares' => (array)$middlewares,
+            'callback' => $callback
+        ];
     }
 
-    public function post($path, $callback)
-    {
-        $this->routes['POST'][$path] = $callback;
-    }
-
-    public function resolve()
+    public function dispatch()
     {
         $method = $_SERVER['REQUEST_METHOD'];
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $handlerFound = false;
-        foreach ($this->middleware as $middleware) {
-            if (!$middleware->handle($_REQUEST, function () use (&$handlerFound, $method, $uri) {
-                foreach ($this->routes[$method] as $path => $callback) {
-                    if ($path === $uri) {
-                        call_user_func($callback);
-                        $handlerFound = true;
-                        return;
-                    }
-                }
-            })) {
-                return;
-            }
-        }
+        $uri = $_SERVER['REQUEST_URI'];
 
-        if (!$handlerFound) {
-            http_response_code(404);
+        if (isset($this->routes[$method][$uri])) {
+            $route = $this->routes[$method][$uri];
+            $request = [];  // Initialize an empty request array or build from globals
+
+            $next = function ($req) use ($route) {
+                call_user_func($route['callback'], $req);  // Execute the final route callback
+            };
+
+            // Process middlewares
+            $middlewareResult = array_reduce(array_reverse($route['middlewares']), function ($next, $middleware) {
+                return function ($req) use ($middleware, $next) {
+                    return $middleware($req, $next);  // Pass the request and the next middleware/callback
+                };
+            }, $next);
+
+            $middlewareResult($request);  // Start middleware chain with initial request
+        } else {
+            header("HTTP/1.0 404 Not Found");
             echo "404 Not Found";
         }
     }

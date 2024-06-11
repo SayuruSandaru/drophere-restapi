@@ -3,32 +3,50 @@
 namespace App\Middleware;
 
 use App\Utility\ResponseUtility;
-use App\Middleware\MiddlewareBase;
 
-class InputValidationMiddleware extends MiddlewareBase
+class InputValidationMiddleware
 {
     private $rules;
 
-    public function __construct($rules)
+    public function __construct(array $rules)
     {
         $this->rules = $rules;
     }
 
-    public function handle($request, $next)
+    public function __invoke($request, $next)
     {
         $data = json_decode(file_get_contents('php://input'), true);
+        if ($data === null) {
+            $data = [];  // Ensures $data is an array even if the JSON decoding fails
+        }
 
-        foreach ($this->rules as $key => $rule) {
-            if (!isset($data[$key])) {
-                ResponseUtility::sendJsonResponse(['status' => 'error', 'message' => 'Invalid data, ' . $key . ' is required'], 400);
-                return false;
-            }
-            if ($rule === 'email' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL)) {
-                ResponseUtility::sendJsonResponse(['status' => 'ailure', 'message' => $key . ' is not a valid mail'], 400);
-                return false;
+        // Merge decoded data into the request array
+        $request = array_merge($request, $data);
+
+        // Perform validation
+        $errors = $this->validate($request);
+
+        // Check for validation errors
+        if (!empty($errors)) {
+            ResponseUtility::sendJsonResponse(['errors' => $errors], 400);
+            return false;  // Stop further middleware execution and route handling
+        }
+
+        return $next($request);  // Proceed to the next middleware or the route's callback
+    }
+
+    private function validate($request)
+    {
+        $errors = [];
+
+        foreach ($this->rules as $field => $rule) {
+            if ($rule === 'required' && empty($request[$field])) {
+                $errors[$field] = $field . ' is required';
+            } elseif ($rule === 'email' && isset($request[$field]) && !filter_var($request[$field], FILTER_VALIDATE_EMAIL)) {
+                $errors[$field] = $field . ' must be a valid email address';
             }
         }
 
-        return $next();
+        return $errors;
     }
 }
