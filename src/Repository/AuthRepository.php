@@ -42,17 +42,15 @@ class AuthRepository
     public function register($email, $password, $firstname, $lastname, $username, $phone, $profile_image)
     {
         try {
-            // echo "email: $email, password: $password, firstname: $firstname, \nlastname: $lastname, username: $username, phone: $phone,\n profile_image: $profile_image";
-            $stmt = $this->DB->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
-            // echo "stmt: $stmt->error";
+            $stmt = $this->DB->prepare("SELECT * FROM users WHERE email = ?");
             if ($stmt === false) {
                 throw new Exception('Prepare failed: ' . htmlspecialchars($this->DB->error));
             }
-            $stmt->bind_param("ss", $email, $username);
+            $stmt->bind_param("s", $email,);
             $stmt->execute();
             $result = $stmt->get_result();
             if ($result->num_rows > 0) {
-                throw new Exception("A user with this email or username already exists");
+                throw new Exception("A user with this email already exists");
             }
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 

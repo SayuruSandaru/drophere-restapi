@@ -10,9 +10,9 @@ class AuthMiddleware extends MiddlewareBase
 {
     private $authenticationService;
 
-    public function __construct(AuthService $authenticationService)
+    public function __construct()
     {
-        $this->authenticationService = $authenticationService;
+        $this->authenticationService = new AuthService();
     }
 
     public function handle($request, $next)
@@ -23,14 +23,27 @@ class AuthMiddleware extends MiddlewareBase
             ResponseUtility::sendJsonResponse('error', ['message' => 'Authorization header is required'], 401);
             exit;
         }
+
         $token = $headers['Authorization'];
         $token = str_replace('Bearer ', '', $token);
         $token = trim($token);
-        if (!$this->authenticationService->validateToken($token)) {
+
+        $validationResult = $this->authenticationService->validateToken($token);
+
+        if (!$validationResult['status']) {
             http_response_code(401);
-            ResponseUtility::sendJsonResponse('error', ['message' => 'Invalid token'], 401);
+            ResponseUtility::sendJsonResponse('error', ['message' => $validationResult['message']], 401);
             exit;
         }
-        return $next();
+
+        $userId = $validationResult['data']['userid'] ?? null;
+        if ($userId === null) {
+            http_response_code(401);
+            ResponseUtility::sendJsonResponse('error', ['message' => 'User ID could not be obtained'], 401);
+            exit;
+        }
+        $request['userId'] = $userId;
+
+        return $next($request);
     }
 }

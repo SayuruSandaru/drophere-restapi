@@ -2,6 +2,8 @@
 
 namespace App\Router;
 
+use Exception;
+
 class Router
 {
     private $routes = [];
@@ -26,20 +28,34 @@ class Router
 
         if (isset($this->routes[$method][$uri])) {
             $route = $this->routes[$method][$uri];
-            $request = [];  // Initialize an empty request array or build from globals
+            $request = json_decode(file_get_contents('php://input'), true);
 
+            // Define the final action to call the callback
             $next = function ($req) use ($route) {
-                call_user_func($route['callback'], $req);  // Execute the final route callback
+                if (is_callable($route['callback'])) {
+                    call_user_func($route['callback'], $req);
+                } else {
+                    throw new Exception("Callback is not callable.");
+                }
             };
 
             // Process middlewares
-            $middlewareResult = array_reduce(array_reverse($route['middlewares']), function ($next, $middleware) {
-                return function ($req) use ($middleware, $next) {
-                    return $middleware($req, $next);  // Pass the request and the next middleware/callback
-                };
-            }, $next);
+            $processMiddlewares = function ($middlewares, $request, $next) {
+                $lastCallable = $next;
+                while ($middleware = array_pop($middlewares)) {
+                    $lastCallable = function ($req) use ($middleware, $lastCallable) {
+                        if (is_callable([$middleware, 'handle'])) {
+                            return $middleware->handle($req, $lastCallable);
+                        } else {
+                            throw new Exception("Middleware handle method is not callable.");
+                        }
+                    };
+                }
+                return $lastCallable($request);
+            };
 
-            $middlewareResult($request);  // Start middleware chain with initial request
+            // Start processing middlewares
+            $processMiddlewares($route['middlewares'], $request, $next);
         } else {
             header("HTTP/1.0 404 Not Found");
             echo "404 Not Found";

@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Repository\AuthRepository;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class AuthService
 {
@@ -37,17 +38,24 @@ class AuthService
     public function validateToken($token): array
     {
         try {
-            $payload = JWT::decode($token, $this->secretKey, [$this->algorithm]);
+            $payload = JWT::decode($token, new Key($this->secretKey, $this->algorithm));
             return [
                 "status" => true,
                 "data" => (array) $payload
             ];
         } catch (\Exception $e) {
+            echo "ff";
             return [
                 "status" => false,
                 "message" => $e->getMessage()
             ];
         }
+    }
+
+    public function getUserIdFromToken($token)
+    {
+        $payload = JWT::decode($token, $this->secretKey, [$this->algorithm]);
+        return $payload->userid;
     }
 
     public function login($username, $password)

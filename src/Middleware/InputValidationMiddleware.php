@@ -13,7 +13,7 @@ class InputValidationMiddleware
         $this->rules = $rules;
     }
 
-    public function __invoke($request, $next)
+    public function handle($request, $next)
     {
         $data = json_decode(file_get_contents('php://input'), true);
         if ($data === null) {
