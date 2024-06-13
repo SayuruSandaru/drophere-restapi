@@ -36,7 +36,7 @@ class FileUploadController
                         "message" => "file uploaded sucessfully",
                         "url" => $result
                     ],
-                    500
+                    200
                 );
             }
         } else {
