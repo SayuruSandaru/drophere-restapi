@@ -13,6 +13,11 @@ class Router
         $this->addRoute('POST', $uri, $middlewares, $callback);
     }
 
+    public function get($uri, $middlewares, $callback)
+    {
+        $this->addRoute('GET', $uri, $middlewares, $callback);
+    }
+
     private function addRoute($method, $uri, $middlewares, $callback)
     {
         $this->routes[$method][$uri] = [
@@ -26,14 +31,25 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = $_SERVER['REQUEST_URI'];
 
-        if (isset($this->routes[$method][$uri])) {
-            $route = $this->routes[$method][$uri];
-            $request = json_decode(file_get_contents('php://input'), true);
+        $parsedUri = parse_url($uri);
+        $path = $parsedUri['path'];
+
+        $route = $this->matchRoute($method, $path);
+
+        if ($route) {
+            // Initialize the request array and decode the JSON body if present
+            $request = array_merge($_GET, $_POST);
+            $jsonRequestBody = json_decode(file_get_contents('php://input'), true);
+            if (is_array($jsonRequestBody)) {
+                $request = array_merge($request, $jsonRequestBody);
+            }
+
+            $params = $route['params'];
 
             // Define the final action to call the callback
-            $next = function ($req) use ($route) {
+            $next = function ($req) use ($route, $params) {
                 if (is_callable($route['callback'])) {
-                    call_user_func($route['callback'], $req);
+                    call_user_func($route['callback'], $req, ...array_values($params));
                 } else {
                     throw new Exception("Callback is not callable.");
                 }
@@ -60,5 +76,35 @@ class Router
             header("HTTP/1.0 404 Not Found");
             echo "404 Not Found";
         }
+    }
+
+    private function matchRoute($method, $path)
+    {
+        if (!isset($this->routes[$method])) {
+            return false;
+        }
+
+        foreach ($this->routes[$method] as $routeUri => $route) {
+            $routeUriPattern = preg_replace('/{([^}]+)}/', '([^/]+)', $routeUri);
+            $routeUriPattern = str_replace('/', '\/', $routeUriPattern);
+            $routeUriPattern = '/^' . $routeUriPattern . '$/';
+
+            if (preg_match($routeUriPattern, $path, $matches)) {
+                array_shift($matches);
+                $params = [];
+
+                if (preg_match_all('/{([^}]+)}/', $routeUri, $paramNames)) {
+                    $paramNames = $paramNames[1];
+                    foreach ($paramNames as $index => $name) {
+                        $params[$name] = $matches[$index];
+                    }
+                }
+
+                $route['params'] = $params;
+                return $route;
+            }
+        }
+
+        return false;
     }
 }

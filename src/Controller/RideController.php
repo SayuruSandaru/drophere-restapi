@@ -2,30 +2,29 @@
 
 namespace App\Controller;
 
-use App\Service\DriverService;
+use App\Service\RideService;
 use App\Utility\ResponseUtility;
 
-class DriverController
+class RideController
 {
-    private $driverService;
+    private $rideService;
 
     public function __construct()
     {
-        $this->driverService = new DriverService();
+        $this->rideService = new RideService();
     }
 
-    public function registerDriver($request)
+    public function createRide($request)
     {
-        $userId = $request['userId'];
-        $firstName = $request['first_name'];
-        $lastName = $request['last_name'];
-        $street = $request['street'];
-        $city = $request['city'];
-        $province = $request['province'];
-        $verificationDoc = $request['verification_doc'];
+        $driver_id = $request['driver_id'];
         $status = $request['status'];
+        $start_time = $request['start_time'];
+        $current_location = $request['current_location'];
+        $route_id = $request['route_id'];
+        $start_location = $request['start_location'];
+        $end_location = $request['end_location'];
 
-        $res = $this->driverService->createDriver($userId, $firstName, $lastName, $street, $city, $province, $verificationDoc, $status);
+        $res = $this->rideService->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location);
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
@@ -42,16 +41,16 @@ class DriverController
         }
     }
 
-    public function getDriverById($request)
+    public function getRideById($request)
     {
-        $driverId = $request['driverId'];
+        $ride_id = $request['ride_id'];
 
-        $res = $this->driverService->getDriverById($driverId);
+        $res = $this->rideService->getRideById($ride_id);
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_SUCCESS,
-                ['driver' => $res['driver']],
+                ['ride' => $res['ride']],
                 200
             );
         } else {
@@ -63,14 +62,14 @@ class DriverController
         }
     }
 
-    public function getAllDrivers()
+    public function getAllRides()
     {
-        $res = $this->driverService->getAllDrivers();
+        $res = $this->rideService->getAllRides();
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_SUCCESS,
-                ['drivers' => $res['drivers']],
+                ['rides' => $res['rides']],
                 200
             );
         } else {

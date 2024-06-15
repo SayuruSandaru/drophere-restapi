@@ -44,7 +44,6 @@ class AuthService
                 "data" => (array) $payload
             ];
         } catch (\Exception $e) {
-            echo "ff";
             return [
                 "status" => false,
                 "message" => $e->getMessage()

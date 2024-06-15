@@ -2,30 +2,30 @@
 
 namespace App\Service;
 
-use App\Repository\DriverRepository;
+use App\Repository\RideRepository;
 
-class DriverService
+class RideService
 {
-    private $driverRepository;
+    private $rideRepository;
 
     public function __construct()
     {
-        $this->driverRepository = new DriverRepository();
+        $this->rideRepository = new RideRepository();
     }
 
-    public function createDriver($userId, $firstName, $lastName, $street, $city, $province, $verificationDoc, $status)
+    public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location)
     {
         try {
-            $res = $this->driverRepository->registerDriver($firstName, $lastName, $street, $city, $province, $verificationDoc, $status, $userId);
+            $res =  $this->rideRepository->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location);
             if ($res) {
                 return [
                     'status' => true,
-                    'message' => 'Driver registered successfully'
+                    'message' => 'Ride created successfully'
                 ];
             } else {
                 return [
                     'status' => false,
-                    'message' => 'Error in registering driver'
+                    'message' => 'Error in creating ride'
                 ];
             }
         } catch (\Exception $e) {
@@ -37,13 +37,13 @@ class DriverService
         }
     }
 
-    public function getDriverById($driverId)
+    public function getRideById($ride_id)
     {
         try {
-            $driver = $this->driverRepository->getDriverById($driverId);
+            $ride = $this->rideRepository->getRideById($ride_id);
             return [
                 'status' => true,
-                'driver' => $driver
+                'ride' => $ride
             ];
         } catch (\Exception $e) {
             error_log($e->getMessage());
@@ -54,13 +54,13 @@ class DriverService
         }
     }
 
-    public function getAllDrivers()
+    public function getAllRides()
     {
         try {
-            $drivers = $this->driverRepository->getAllDrivers();
+            $rides = $this->rideRepository->getAllRides();
             return [
                 'status' => true,
-                'drivers' => $drivers
+                'rides' => $rides
             ];
         } catch (\Exception $e) {
             error_log($e->getMessage());
