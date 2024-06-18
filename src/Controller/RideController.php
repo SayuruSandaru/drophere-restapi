@@ -20,7 +20,7 @@ class RideController
         $status = $request['status'];
         $start_time = $request['start_time'];
         $current_location = $request['current_location'];
-        $route_id = $request['route_id'];
+        $route_id = $request['route'];
         $start_location = $request['start_location'];
         $end_location = $request['end_location'];
 
