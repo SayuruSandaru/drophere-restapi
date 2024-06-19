@@ -20,7 +20,7 @@ class AuthService
     public function generateToken($user)
     {
         $issuedAt = time();
-        $expirationTime = $issuedAt + 3600 * 24;
+        $expirationTime = $issuedAt + 3600 * 24 * 30;
         $payload = array(
             'userid' => $user['id'],
             'email' => $user['email'],
