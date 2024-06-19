@@ -80,4 +80,26 @@ class RideController
             );
         }
     }
+
+    public function searchRides($request)
+    {
+        $pickup = ['lat' => $request['pickup_lat'], 'lng' => $request['pickup_lng']];
+        $destination = ['lat' => $request['destination_lat'], 'lng' => $request['destination_lng']];
+
+        $suggestedRides = $this->rideService->searchRides($pickup, $destination);
+
+        if (!empty($suggestedRides)) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => $suggestedRides],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => 'No suitable rides found.'],
+                404
+            );
+        }
+    }
 }

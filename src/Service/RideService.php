@@ -70,4 +70,86 @@ class RideService
             ];
         }
     }
+
+    public function searchRides($pickup, $destination)
+    {
+        $rides = $this->rideRepository->getAllRides();
+        $suggestedRides = [];
+
+        foreach ($rides as $ride) {
+            $routePoints = $this->decodePolyline($ride['route']);
+
+            // Check if both pickup and destination points are on the route
+            if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
+                $suggestedRides[] = $ride;
+            }
+        }
+
+        return $suggestedRides;
+    }
+
+    private function decodePolyline($polyline)
+    {
+        $points = [];
+        $index = 0;
+        $len = strlen($polyline);
+        $lat = 0;
+        $lng = 0;
+
+        while ($index < $len) {
+            $b = 0;
+            $shift = 0;
+            $result = 0;
+            do {
+                $b = ord($polyline[$index++]) - 63;
+                $result |= ($b & 0x1f) << $shift;
+                $shift += 5;
+            } while ($b >= 0x20);
+            $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+            $lat += $dlat;
+
+            $shift = 0;
+            $result = 0;
+            do {
+                $b = ord($polyline[$index++]) - 63;
+                $result |= ($b & 0x1f) << $shift;
+                $shift += 5;
+            } while ($b >= 0x20);
+            $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+            $lng += $dlng;
+
+            $points[] = ['lat' => $lat / 1E5, 'lng' => $lng / 1E5];
+        }
+
+        return $points;
+    }
+
+    private function isPointOnRoute($point, $routePoints, $tolerance = 100) // tolerance in meters
+    {
+        foreach ($routePoints as $routePoint) {
+            if ($this->haversineDistance($point, $routePoint) < $tolerance) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function haversineDistance($point1, $point2)
+    {
+        $earthRadius = 6371000; // meters
+        $lat1 = deg2rad($point1['lat']);
+        $lon1 = deg2rad($point1['lng']);
+        $lat2 = deg2rad($point2['lat']);
+        $lon2 = deg2rad($point2['lng']);
+
+        $dlat = $lat2 - $lat1;
+        $dlon = $lon2 - $lon1;
+
+        $a = sin($dlat / 2) * sin($dlat / 2) +
+            cos($lat1) * cos($lat2) *
+            sin($dlon / 2) * sin($dlon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
 }

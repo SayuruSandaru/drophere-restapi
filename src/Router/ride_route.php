@@ -34,4 +34,8 @@ function registerRideRoutes(Router $router)
     $router->get('/rides', [$authMiddleware], function ($request) use ($rideController) {
         $rideController->getAllRides();
     });
+
+    $router->post('/rides/search', [$authMiddleware], function ($request) use ($rideController) {
+        $rideController->searchRides($request);
+    });
 }
