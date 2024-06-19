@@ -10,13 +10,10 @@ function registerDriverRoutes(Router $router)
     $driverController = new DriverController();
     $authMiddleware = new AuthMiddleware();
     $driverValidation = new InputValidationMiddleware([
-        'first_name' => 'required',
-        'last_name' => 'required',
         'street' => 'required',
         'city' => 'required',
         'province' => 'required',
-        'verification_doc' => 'required',
-        'status' => 'required',
+        'proof_document' => 'required',
     ]);
 
     $router->post('/driver/register', [$authMiddleware, $driverValidation], function ($request) use ($driverController) {

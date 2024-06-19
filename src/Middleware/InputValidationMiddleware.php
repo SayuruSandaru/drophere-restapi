@@ -17,22 +17,22 @@ class InputValidationMiddleware
     {
         $data = json_decode(file_get_contents('php://input'), true);
         if ($data === null) {
-            $data = [];  // Ensures $data is an array even if the JSON decoding fails
+            $data = [];
         }
 
-        // Merge decoded data into the request array
+
         $request = array_merge($request, $data);
 
-        // Perform validation
+
         $errors = $this->validate($request);
 
-        // Check for validation errors
+
         if (!empty($errors)) {
-            ResponseUtility::sendJsonResponse(['errors' => $errors], 400);
-            return false;  // Stop further middleware execution and route handling
+            ResponseUtility::sendJsonResponse(ResponseUtility::STATUS_ERROR, ['errors' => $errors], 400);
+            return false;
         }
 
-        return $next($request);  // Proceed to the next middleware or the route's callback
+        return $next($request);
     }
 
     private function validate($request)

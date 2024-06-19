@@ -16,11 +16,10 @@ class DriverRepository
         $this->DB = getDBConnection();
     }
 
-    public function registerDriver($firstName, $lastName, $street, $city, $province, $verificationDoc, $status, $userId)
+    public function registerDriver($street, $city, $province, $proofDocument, $userId)
     {
         try {
-
-            $stmt = $this->DB->prepare("SELECT driver_id FROM drivers WHERE driver_id = ?");
+            $stmt = $this->DB->prepare("SELECT driver_id FROM drivers WHERE user_id = ?");
             $stmt->bind_param("i", $userId);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -28,19 +27,21 @@ class DriverRepository
                 throw new Exception("Driver already registered");
             }
 
-            $stmt = $this->DB->prepare("INSERT INTO drivers (driver_id, first_name, last_name, street, city, province, verification_doc, status) 
-                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("isssssss", $userId, $firstName, $lastName, $street, $city, $province, $verificationDoc, $status);
+            $status = 'pending';
+            $stmt = $this->DB->prepare("INSERT INTO drivers (user_id, street, city, province, proof_document, status) 
+                                    VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("isssss", $userId, $street, $city, $province, $proofDocument, $status);
             $stmt->execute();
             if ($stmt->affected_rows == 0) {
                 throw new Exception("Error in registering driver");
             }
-            return true;
+            return $this->DB->insert_id;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new Exception($e->getMessage());
         }
     }
+
 
 
     public function getDriverById($driver_id)

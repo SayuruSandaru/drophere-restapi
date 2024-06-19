@@ -13,14 +13,16 @@ class DriverService
         $this->driverRepository = new DriverRepository();
     }
 
-    public function createDriver($userId, $firstName, $lastName, $street, $city, $province, $verificationDoc, $status)
+    public function createDriver($street, $city, $province, $verificationDoc, $userId)
     {
         try {
-            $res = $this->driverRepository->registerDriver($firstName, $lastName, $street, $city, $province, $verificationDoc, $status, $userId);
-            if ($res) {
+            $res = $this->driverRepository->registerDriver($street, $city, $province, $verificationDoc, $userId);
+            echo $res;
+            if ($res !== 0) {
                 return [
                     'status' => true,
-                    'message' => 'Driver registered successfully'
+                    'message' => 'Driver registered successfully',
+                    'driver_id' => $res
                 ];
             } else {
                 return [

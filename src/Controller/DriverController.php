@@ -17,20 +17,15 @@ class DriverController
     public function registerDriver($request)
     {
         $userId = $request['userId'];
-        $firstName = $request['first_name'];
-        $lastName = $request['last_name'];
         $street = $request['street'];
         $city = $request['city'];
         $province = $request['province'];
-        $verificationDoc = $request['verification_doc'];
-        $status = $request['status'];
-
-        $res = $this->driverService->createDriver($userId, $firstName, $lastName, $street, $city, $province, $verificationDoc, $status);
-
+        $verificationDoc = $request['proof_document'];
+        $res = $this->driverService->createDriver($street, $city, $province, $verificationDoc, $userId);
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_SUCCESS,
-                ['message' => $res['message']],
+                ['message' => $res['message'], 'driver_id' => $res['driver_id']],
                 200
             );
         } else {
