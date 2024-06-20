@@ -13,7 +13,8 @@ function registerVehicleRoutes(Router $router)
         'available' => 'required',
         'license_plate' => 'required',
         'model' => 'required',
-        'year' => 'required'
+        'year' => 'required',
+        'image_url' => 'required'
     ]);
 
     $vehicleController = new VehicleController();

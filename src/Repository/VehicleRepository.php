@@ -15,14 +15,14 @@ class VehicleRepository
     }
 
 
-    public function addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year)
+    public function addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year, $image_url)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO vehicles (owner_id, type, capacity, available, license_plate, model, year) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $this->DB->prepare("INSERT INTO vehicles (owner_id, type, capacity, available, license_plate, model, year, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new \Exception("Failed to prepare statement: " . $this->DB->error);
             }
-            $stmt->bind_param("isisssi", $owner_id, $type, $capacity, $available, $licensePlate, $model, $year);
+            $stmt->bind_param("isisssis", $owner_id, $type, $capacity, $available, $licensePlate, $model, $year, $image_url);
             $stmt->execute();
             if ($stmt->affected_rows == 0) {
                 throw new \Exception("Error in adding vehicle");
@@ -38,6 +38,7 @@ class VehicleRepository
             throw new \Exception($e->getMessage());
         }
     }
+
 
     public function getVehicleById($vehicle_id)
     {

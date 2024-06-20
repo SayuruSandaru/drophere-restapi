@@ -16,6 +16,7 @@ class VehicleController
 
     public function addVehicle($request)
     {
+
         $owner_id = $request['userId'];
         $type = $request['type'];
         $capacity = $request['capacity'];
@@ -23,8 +24,8 @@ class VehicleController
         $licensePlate = $request['license_plate'];
         $model = $request['model'];
         $year = $request['year'];
-
-        $res = $this->vehicleService->addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year);
+        $image_url = $request['image_url'];
+        $res = $this->vehicleService->addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year, $image_url);
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(

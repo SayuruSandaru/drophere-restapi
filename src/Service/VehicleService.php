@@ -13,10 +13,10 @@ class VehicleService
         $this->vehicleRepository = new VehicleRepository();
     }
 
-    public function addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year)
+    public function addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year, $image_url)
     {
         try {
-            $vehicleId = $this->vehicleRepository->addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year);
+            $vehicleId = $this->vehicleRepository->addVehicle($owner_id, $type, $capacity, $available, $licensePlate, $model, $year, $image_url);
             if ($vehicleId > 0) {
                 return [
                     'status' => true,
