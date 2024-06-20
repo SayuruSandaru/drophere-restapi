@@ -28,7 +28,6 @@ class VehicleRepository
                 throw new \Exception("Error in adding vehicle");
             }
             $vehicleId = $this->DB->insert_id;
-            echo $vehicleId;
             return $vehicleId;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
