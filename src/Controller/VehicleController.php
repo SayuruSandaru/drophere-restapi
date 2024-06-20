@@ -16,7 +16,7 @@ class VehicleController
 
     public function addVehicle($request)
     {
-        $owner_id = $request['owner_id'];
+        $owner_id = $request['userId'];
         $type = $request['type'];
         $capacity = $request['capacity'];
         $available = $request['available'];

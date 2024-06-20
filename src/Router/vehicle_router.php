@@ -3,13 +3,23 @@
 use App\Router\Router;
 use App\Controller\VehicleController;
 use App\Middleware\AuthMiddleware;
+use App\Middleware\InputValidationMiddleware;
 
 function registerVehicleRoutes(Router $router)
 {
+    $vehicleValidation = new InputValidationMiddleware([
+        'type' => 'required',
+        'capacity' => 'required',
+        'available' => 'required',
+        'license_plate' => 'required',
+        'model' => 'required',
+        'year' => 'required'
+    ]);
+
     $vehicleController = new VehicleController();
     $authMiddleware = new AuthMiddleware();
 
-    $router->post('/vehicle/add', [$authMiddleware], function ($request) use ($vehicleController) {
+    $router->post('/vehicle/add', [$authMiddleware, $vehicleValidation], function ($request) use ($vehicleController) {
         $vehicleController->addVehicle($request);
     });
 
