@@ -17,7 +17,6 @@ class DriverService
     {
         try {
             $res = $this->driverRepository->registerDriver($street, $city, $province, $verificationDoc, $userId);
-            echo $res;
             if ($res !== 0) {
                 return [
                     'status' => true,
