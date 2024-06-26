@@ -3,14 +3,20 @@
 namespace App\Service;
 
 use App\Repository\RideRepository;
+use App\Repository\DriverRepository;
+use App\Repository\VehicleRepository;
 
 class RideService
 {
     private $rideRepository;
+    private $vehicleRepository;
+    private $driverRepository;
 
     public function __construct()
     {
         $this->rideRepository = new RideRepository();
+        $this->driverRepository = new DriverRepository();
+        $this->vehicleRepository = new VehicleRepository();
     }
 
     public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id)
@@ -81,6 +87,16 @@ class RideService
 
             // Check if both pickup and destination points are on the route
             if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
+                // Fetch ride owner details
+                $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
+                $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+                if ($ownerDetails) {
+                    $ride['owner_details'] = $ownerDetails;
+                }
+                if ($vehicleDetails) {
+                    $ride['vehicle_details'] = $vehicleDetails;
+                }
+
                 $suggestedRides[] = $ride;
             }
         }
