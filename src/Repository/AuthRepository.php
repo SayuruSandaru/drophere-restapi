@@ -51,7 +51,7 @@ class AuthRepository
             if ($result->num_rows > 0) {
                 throw new Exception("A user with this email already exists");
             }
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
             $stmt = $this->DB->prepare("INSERT INTO users (email, password, firstname, lastname, username, phone, profile_image) VALUES (?, ?, ?, ?, ?, ?, ?)");
             if ($stmt === false) {
