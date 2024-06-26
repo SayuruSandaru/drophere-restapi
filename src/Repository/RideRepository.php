@@ -15,15 +15,14 @@ class RideRepository
     }
 
 
-
-    public function createRide($driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location)
+    public function createRide($driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO ride (driver_id, status, start_time, current_location, route, start_location, end_location) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $this->DB->prepare("INSERT INTO ride (driver_id, status, start_time, current_location, route, start_location, end_location, vehicle_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new Exception("Failed to prepare the SQL statement: " . $this->DB->error);
             }
-            $stmt->bind_param("issssss", $driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location);
+            $stmt->bind_param("issssssi", $driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id);
             $stmt->execute();
             if ($stmt->affected_rows == 0) {
                 throw new Exception("Error in creating ride: No rows affected.");
@@ -38,6 +37,7 @@ class RideRepository
             throw new Exception("General error: " . $e->getMessage());
         }
     }
+
 
 
     public function getAllRides()

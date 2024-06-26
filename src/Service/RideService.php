@@ -13,10 +13,10 @@ class RideService
         $this->rideRepository = new RideRepository();
     }
 
-    public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location)
+    public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id)
     {
         try {
-            $res =  $this->rideRepository->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location);
+            $res =  $this->rideRepository->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id);
             if ($res) {
                 return [
                     'status' => true,

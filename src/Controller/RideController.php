@@ -17,6 +17,7 @@ class RideController
     public function createRide($request)
     {
         $driver_id = $request['driver_id'];
+        $vehicle_id = $request['vehicle_id'];
         $status = $request['status'];
         $start_time = $request['start_time'];
         $current_location = $request['current_location'];
@@ -24,7 +25,7 @@ class RideController
         $start_location = $request['start_location'];
         $end_location = $request['end_location'];
 
-        $res = $this->rideService->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location);
+        $res = $this->rideService->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id);
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(

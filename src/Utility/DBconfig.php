@@ -24,3 +24,5 @@ function getDBConnection()
     }
     return $conn;
 }
+
+

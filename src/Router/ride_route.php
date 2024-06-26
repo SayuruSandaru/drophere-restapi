@@ -12,6 +12,7 @@ function registerRideRoutes(Router $router)
     $authMiddleware = new AuthMiddleware();
     $rideValidation = new InputValidationMiddleware([
         'driver_id' => 'required',
+        'vehicle_id' => 'required',
         'status' => 'required',
         'start_time' => 'required',
         'current_location' => 'required',

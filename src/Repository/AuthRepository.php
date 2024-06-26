@@ -12,7 +12,6 @@ class AuthRepository
 
     public function __construct()
     {
-
         $this->DB = getDBConnection();
     }
 
