@@ -76,4 +76,24 @@ class DriverController
             );
         }
     }
+
+    public function getDriverByUserId($request)
+    {
+        $userId = $request['userId'];
+        $res = $this->driverService->getDriverByUserId($userId);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['driver' => $res['driver']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                404
+            );
+        }
+    }
 }

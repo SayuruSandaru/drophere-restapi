@@ -43,7 +43,6 @@ class AuthMiddleware extends MiddlewareBase
             exit;
         }
         $request['userId'] = $userId;
-
         return $next($request);
     }
 }

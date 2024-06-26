@@ -71,4 +71,21 @@ class DriverService
             ];
         }
     }
+
+    public function getDriverByUserId($userId)
+    {
+        try {
+            $driver = $this->driverRepository->getDriverByUserId($userId);
+            return [
+                'status' => true,
+                'driver' => $driver
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }
