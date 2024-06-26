@@ -97,9 +97,9 @@ class RideController
             );
         } else {
             ResponseUtility::sendJsonResponse(
-                ResponseUtility::STATUS_ERROR,
-                ['message' => 'No suitable rides found.'],
-                404
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => []],
+                200
             );
         }
     }
