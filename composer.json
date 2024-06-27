@@ -5,6 +5,7 @@
         }
     },
     "require": {
-        "firebase/php-jwt": "^6.4"
+        "firebase/php-jwt": "^6.4",
+        "aws/aws-sdk-php": "^3.311"
     }
 }

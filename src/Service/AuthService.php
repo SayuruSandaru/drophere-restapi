@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Repository\AuthRepository;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class AuthService
 {
@@ -19,9 +20,9 @@ class AuthService
     public function generateToken($user)
     {
         $issuedAt = time();
-        $expirationTime = $issuedAt + 3600 * 24;
+        $expirationTime = $issuedAt + 3600 * 24 * 30;
         $payload = array(
-            'userid' => $user['userid'],
+            'userid' => $user['id'],
             'email' => $user['email'],
             'firstname' => $user['firstname'],
             'lastname' => $user['lastname'],
@@ -37,7 +38,7 @@ class AuthService
     public function validateToken($token): array
     {
         try {
-            $payload = JWT::decode($token, $this->secretKey, [$this->algorithm]);
+            $payload = JWT::decode($token, new Key($this->secretKey, $this->algorithm));
             return [
                 "status" => true,
                 "data" => (array) $payload
@@ -48,6 +49,12 @@ class AuthService
                 "message" => $e->getMessage()
             ];
         }
+    }
+
+    public function getUserIdFromToken($token)
+    {
+        $payload = JWT::decode($token, $this->secretKey, [$this->algorithm]);
+        return $payload->userid;
     }
 
     public function login($username, $password)
@@ -74,11 +81,10 @@ class AuthService
         }
     }
 
-    public function register($username, $password, $firstname, $lastname, $email, $phone)
+    public function register($username, $password, $firstname, $lastname, $email, $phone, $profile_image)
     {
         try {
-
-            $user = $this->authenticationRepository->register($email, $password, $firstname, $lastname, $username, $phone,);
+            $user = $this->authenticationRepository->register($email, $password, $firstname, $lastname, $username, $phone, $profile_image);
             if ($user !== NULL) {
                 return [
                     "status" => true,
