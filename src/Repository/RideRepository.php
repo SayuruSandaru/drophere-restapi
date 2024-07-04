@@ -159,4 +159,41 @@ class RideRepository
 
         return $earthRadius * $c;
     }
+
+    public function calculateFee($pickup, $destination, $vehicleType)
+    {
+        $distance = $this->getRoadDistance($pickup, $destination);
+        $fee = 0;
+        if ($vehicleType == 'bike') {
+            $fee = $distance * 30;
+        } else if ($vehicleType == 'tuktuk') {
+            $fee = $distance * 40;
+        } else if ($vehicleType == 'car') {
+            $fee = $distance * 50;
+        } else if ($vehicleType == 'van') {
+            $fee = $distance * 50;
+        } else {
+            $fee = $distance * 60;
+        }
+        $response = [
+            'fee' => $fee,
+            'distance' => $distance
+        ];
+        return $response;
+    }
+
+    private function getRoadDistance($pickup, $destination)
+    {
+        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={$pickup['lat']},{$pickup['lng']}&destinations={$destination['lat']},{$destination['lng']}&key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac";
+
+        $response = file_get_contents($url);
+        $data = json_decode($response, true);
+
+        if ($data['status'] == 'OK') {
+            $distance =  $data['rows'][0]['elements'][0]['distance']['value'] / 1000;
+            return $distance;
+        } else {
+            throw new Exception("Error fetching road distance: " . $data['status']);
+        }
+    }
 }
