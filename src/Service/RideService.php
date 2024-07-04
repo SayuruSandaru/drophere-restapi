@@ -85,18 +85,21 @@ class RideService
         foreach ($rides as $ride) {
             $routePoints = $this->decodePolyline($ride['route']);
 
-            // Check if both pickup and destination points are on the route
             if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
-                // Fetch ride owner details
                 $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
                 $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+                $fee = $this->rideRepository->calculateFee($pickup, $destination, $vehicleDetails['type']);
+
                 if ($ownerDetails) {
                     $ride['owner_details'] = $ownerDetails;
                 }
                 if ($vehicleDetails) {
                     $ride['vehicle_details'] = $vehicleDetails;
                 }
-
+                if ($fee) {
+                    $ride['fee'] = $fee['fee'];
+                    $ride['distance'] = $fee['distance'];
+                }
                 $suggestedRides[] = $ride;
             }
         }
