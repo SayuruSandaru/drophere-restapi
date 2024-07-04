@@ -165,13 +165,13 @@ class RideRepository
         $distance = $this->getRoadDistance($pickup, $destination);
         $fee = 0;
         if ($vehicleType == 'bike') {
-            $fee = $distance * 30;
+            $fee = $distance * 20;
         } else if ($vehicleType == 'tuktuk') {
-            $fee = $distance * 40;
+            $fee = $distance * 30;
         } else if ($vehicleType == 'car') {
-            $fee = $distance * 50;
+            $fee = $distance * 40;
         } else if ($vehicleType == 'van') {
-            $fee = $distance * 50;
+            $fee = $distance * 40;
         } else {
             $fee = $distance * 60;
         }
