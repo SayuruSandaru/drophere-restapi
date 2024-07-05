@@ -182,6 +182,28 @@ class RideRepository
         return $response;
     }
 
+    public function getDirections($pickup, $destination)
+    {
+        try {
+            $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$pickup['lat']},{$pickup['lng']}&destination={$destination['lat']},{$destination['lng']}&key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac";
+
+            $response = file_get_contents($url);
+            $data = json_decode($response, true);
+            if ($data['status'] == 'OK') {
+                $routePolylines = [];
+                foreach ($data['routes'] as $route) {
+                    $routePolylines[] = $route['overview_polyline']['points'];
+                }
+            } else {
+                throw new Exception("Error fetching directions: " . $data['status']);
+            }
+            return $routePolylines;
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Error fetching directions: " . $e->getMessage());
+        }
+    }
+
     private function getRoadDistance($pickup, $destination)
     {
         $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={$pickup['lat']},{$pickup['lng']}&destinations={$destination['lat']},{$destination['lng']}&key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac";

@@ -103,4 +103,27 @@ class RideController
             );
         }
     }
+
+
+    public function getDirections($request)
+    {
+        $pickup = ['lat' => $request['pickup_lat'], 'lng' => $request['pickup_lng']];
+        $destination = ['lat' => $request['destination_lat'], 'lng' => $request['destination_lng']];
+
+        $directions = $this->rideService->getDirections($pickup, $destination);
+
+        if ($directions['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['directions' => $directions["directions"]],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => 'Failed to get directions'],
+                500
+            );
+        }
+    }
 }
