@@ -107,6 +107,31 @@ class RideService
         return $suggestedRides;
     }
 
+    public function getDirections($pickup, $destination)
+    {
+        try {
+            $res = $this->rideRepository->getDirections($pickup, $destination);
+            if (empty($res)) {
+                return [
+                    'status' => false,
+                    'message' => 'No directions found'
+                ];
+            } else {
+
+                return [
+                    'status' => true,
+                    'directions' => $res
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
     private function decodePolyline($polyline)
     {
         $points = [];
