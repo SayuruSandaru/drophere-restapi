@@ -206,16 +206,53 @@ class RideRepository
 
     private function getRoadDistance($pickup, $destination)
     {
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={$pickup['lat']},{$pickup['lng']}&destinations={$destination['lat']},{$destination['lng']}&key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac";
+        $url = 'https://routes.googleapis.com/directions/v2:computeRoutes?key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac';
 
-        $response = file_get_contents($url);
+        $data = array(
+            "origin" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $pickup['lat'],
+                        "longitude" => $pickup['lng']
+                    )
+                )
+            ),
+            "destination" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $destination['lat'],
+                        "longitude" => $destination['lng']
+                    )
+                )
+            ),
+            "travelMode" => "DRIVE",
+            "computeAlternativeRoutes" => true
+        );
+
+        $options = array(
+            'http' => array(
+                'header'  => "Content-Type: application/json\r\n" .
+                    "X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data),
+                'follow_location' => true,
+            ),
+        );
+
+        $context  = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
+
+        if ($response === FALSE) {
+            throw new Exception("Error fetching road distance.");
+        }
+
         $data = json_decode($response, true);
 
-        if ($data['status'] == 'OK') {
-            $distance =  $data['rows'][0]['elements'][0]['distance']['value'] / 1000;
+        if (isset($data['routes'][0]['distanceMeters'])) {
+            $distance = $data['routes'][0]['distanceMeters'] / 1000; // Convert meters to kilometers
             return $distance;
         } else {
-            throw new Exception("Error fetching road distance: " . $data['status']);
+            throw new Exception("Error fetching road distance: No distance data in response");
         }
     }
 }
