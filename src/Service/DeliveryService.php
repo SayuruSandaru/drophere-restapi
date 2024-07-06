@@ -61,3 +61,14 @@ class DeliveryService
             $deliveries = $this->deliveryRepository->getAllDeliveries();
             return [
                 'status' => true,
+                'deliveries' => $deliveries
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+}
