@@ -165,15 +165,15 @@ class RideRepository
         $distance = $this->getRoadDistance($pickup, $destination);
         $fee = 0;
         if ($vehicleType == 'bike') {
-            $fee = $distance * 20;
+            $fee = $distance * 5;
         } else if ($vehicleType == 'tuktuk') {
-            $fee = $distance * 30;
+            $fee = $distance * 15;
         } else if ($vehicleType == 'car') {
-            $fee = $distance * 40;
+            $fee = $distance * 20;
         } else if ($vehicleType == 'van') {
-            $fee = $distance * 40;
+            $fee = $distance * 25;
         } else {
-            $fee = $distance * 60;
+            $fee = $distance * 30;
         }
         $response = [
             'fee' => $fee,
@@ -184,25 +184,58 @@ class RideRepository
 
     public function getDirections($pickup, $destination)
     {
-        try {
-            $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$pickup['lat']},{$pickup['lng']}&destination={$destination['lat']},{$destination['lng']}&key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac";
+        $url = 'https://routes.googleapis.com/directions/v2:computeRoutes?key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac';
 
-            $response = file_get_contents($url);
-            $data = json_decode($response, true);
-            if ($data['status'] == 'OK') {
-                $routePolylines = [];
-                foreach ($data['routes'] as $route) {
-                    $routePolylines[] = $route['overview_polyline']['points'];
-                }
-            } else {
-                throw new Exception("Error fetching directions: " . $data['status']);
-            }
-            return $routePolylines;
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-            throw new Exception("Error fetching directions: " . $e->getMessage());
+        $data = array(
+            "origin" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $pickup['lat'],
+                        "longitude" => $pickup['lng']
+                    )
+                )
+            ),
+            "destination" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $destination['lat'],
+                        "longitude" => $destination['lng']
+                    )
+                )
+            ),
+            "travelMode" => "DRIVE",
+            "computeAlternativeRoutes" => true
+        );
+
+        $options = array(
+            'http' => array(
+                'header'  => "Content-Type: application/json\r\n" .
+                    "X-Goog-FieldMask: routes.polyline.encodedPolyline\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data),
+                'follow_location' => true,
+            ),
+        );
+
+        $context  = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
+
+        if ($response === FALSE) {
+            throw new Exception("Error fetching routes polylines.");
+        }
+        $data = json_decode($response, true);
+
+        if (isset($data['routes'])) {
+            $polylines = array_map(function ($route) {
+                return $route['polyline']['encodedPolyline'];
+            }, $data['routes']);
+
+            return $polylines;
+        } else {
+            throw new Exception("Error fetching routes polylines: No polyline data in response");
         }
     }
+
 
     private function getRoadDistance($pickup, $destination)
     {
