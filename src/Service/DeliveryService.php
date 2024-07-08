@@ -13,10 +13,10 @@ class DeliveryService
         $this->deliveryRepository = new DeliveryRepository();
     }
 
-    public function createDelivery(array $data)
+    public function createDelivery($userId, $address, $deliveryDate, $status)
     {
         try {
-            $res = $this->deliveryRepository->createDelivery($data);
+            $res = $this->deliveryRepository->createDelivery($userId, $address, $deliveryDate, $status);
             if ($res !== 0) {
                 return [
                     'status' => true,

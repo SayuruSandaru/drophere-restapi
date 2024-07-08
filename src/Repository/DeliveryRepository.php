@@ -15,15 +15,21 @@ class DeliveryRepository
         $this->DB = getDBConnection();
     }
 
-    public function createDelivery(array $data)
+    public function createDelivery($userId, $address, $deliveryDate, $status)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO deliveries (user_id, delivery_address, delivery_date, status) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("isss", $data['user_id'], $data['delivery_address'], $data['delivery_date'], $data['status']);
-            $stmt->execute();
-            if ($stmt->affected_rows == 0) {
-                throw new Exception("Error in creating delivery");
+            $stmt = $this->DB->prepare("INSERT INTO deliveries (user_id, address, delivery_date, status) VALUES (?, ?, ?, ?)");
+            
+            if (!$stmt) {
+                throw new Exception("Prepare statement failed: " . $this->DB->error);
             }
+
+            $stmt->bind_param("isss", $userId, $address, $deliveryDate, $status);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Execute statement failed: " . $stmt->error);
+            }
+
             return $this->DB->insert_id;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
@@ -35,12 +41,19 @@ class DeliveryRepository
     {
         try {
             $stmt = $this->DB->prepare("SELECT * FROM deliveries WHERE delivery_id = ?");
+            
+            if (!$stmt) {
+                throw new Exception("Prepare statement failed: " . $this->DB->error);
+            }
+
             $stmt->bind_param("i", $deliveryId);
             $stmt->execute();
             $result = $stmt->get_result();
+
             if ($result->num_rows == 0) {
                 throw new Exception("Delivery not found");
             }
+
             return $result->fetch_assoc();
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());

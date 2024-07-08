@@ -16,8 +16,13 @@ class DeliveryController
 
     public function createDelivery($request)
     {
-        $data = $request->getParsedBody();
-        $res = $this->deliveryService->createDelivery($data);
+        $userId = $request['user_id'];
+        $deliveryAddress = $request['delivery_address'];
+        $deliveryDate = $request['delivery_date'];
+        $status = $request['status'];
+
+        $res = $this->deliveryService->createDelivery($userId, $deliveryAddress, $deliveryDate, $status);
+
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_SUCCESS,
@@ -36,6 +41,7 @@ class DeliveryController
     public function getDeliveryById($request)
     {
         $deliveryId = $request['id'];
+
         $res = $this->deliveryService->getDeliveryById($deliveryId);
 
         if ($res['status']) {
