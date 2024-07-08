@@ -95,7 +95,7 @@ class DriverRepository
         }
     }
 
-    //Get driver details
+
     public function findByUserId($userId)
     {
         try {
