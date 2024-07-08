@@ -48,4 +48,9 @@ function registerUserRouter(Router $router)
     $router->get('/users/{id}/details', [$authMiddleware], function ($request, $id) use ($userController) {
         $userController->getUserDetails($id);
     });
+
+    $router->get('/user', [$authMiddleware], function ($request) use ($userController) {
+        $id = $request['userId'];
+        $userController->getUserDetails($id);
+    });
 }
