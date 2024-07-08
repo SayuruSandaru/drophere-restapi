@@ -1,5 +1,39 @@
 <?php
 
-function registerUserRouter($router)
+use App\Router\Router;
+use App\Controller\UserController;
+use App\Middleware\AuthMiddleware;
+use App\Middleware\InputValidationMiddleware;
+
+function registerUserRouter(Router $router)
 {
+    {
+        $reviewValidation = new InputValidationMiddleware([
+            'description' => 'required',
+            'rating' => 'required|integer|min:1|max:5',
+            'driver_id' => 'required|integer'
+        ]);
+    
+        $userController = new UserController();
+        $authMiddleware = new AuthMiddleware();
+    
+        $router->post('/review/add', [$authMiddleware, $reviewValidation], function ($request) use ($userController) {
+            $userController->addReview($request);
+        });
+       
+        $router->get('/reviews/driver/{driverId}', [$authMiddleware], function ($request, $driverId) use ($userController) {
+            $userController->getReviewsByDriverId(['driver_id' => $driverId]);
+        });
+
+    
+        // $router->get('/review/{reviewId}', [$authMiddleware], function ($request, $reviewId) use ($userController) {
+        //     $userController->getReviewById(['review_id' => $reviewId]);
+        // });
+    
+        // $router->get('/reviews', [$authMiddleware], function ($request) use ($userController) {
+        //     $userController->getAllReviews();
+        // });
+    
+        
+    }
 }
