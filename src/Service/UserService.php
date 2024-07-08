@@ -137,9 +137,7 @@ class UserService
             if (!$user) {
                 return ['status' => false, 'message' => 'User not found'];
             }
-
             $driverDetails = $this->driverRepository->findByUserId($id);
-
             if ($driverDetails) {
                 return [
                     'status' => true,
@@ -155,6 +153,7 @@ class UserService
                 ];
             }
         } catch (\Exception $e) {
+            echo $e->getMessage();
             error_log($e->getMessage());
             return ['status' => false, 'message' => 'Error retrieving user details'];
         }

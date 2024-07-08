@@ -86,7 +86,7 @@ class DriverRepository
             $stmt->execute();
             $result = $stmt->get_result();
             if ($result->num_rows == 0) {
-                throw new Exception("Driver not found");
+                return null;
             }
             return $result->fetch_assoc();
         } catch (\mysqli_sql_exception $e) {
@@ -95,7 +95,7 @@ class DriverRepository
         }
     }
 
-//Get driver details
+    //Get driver details
     public function findByUserId($userId)
     {
         try {
@@ -104,7 +104,7 @@ class DriverRepository
             $stmt->execute();
             $result = $stmt->get_result();
             if ($result->num_rows == 0) {
-                throw new Exception("Driver not found");
+                return null;
             }
             return $result->fetch_assoc();
         } catch (\mysqli_sql_exception $e) {
