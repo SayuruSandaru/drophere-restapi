@@ -7,49 +7,35 @@ use App\Middleware\InputValidationMiddleware;
 
 function registerUserRouter(Router $router)
 {
-    {
-        $reviewValidation = new InputValidationMiddleware([
-            'description' => 'required',
-            'rating' => 'required|integer|min:1|max:5',
-            'driver_id' => 'required|integer'
-        ]);
-    
-        $userController = new UserController();
-        $authMiddleware = new AuthMiddleware();
-    
-        $router->post('/review/add', [$authMiddleware, $reviewValidation], function ($request) use ($userController) {
-            $userController->addReview($request);
-        });
-       
-        $router->get('/reviews/driver/{driverId}', [$authMiddleware], function ($request, $driverId) use ($userController) {
-            $userController->getReviewsByDriverId(['driver_id' => $driverId]);
-        });
+    $userController = new UserController();
+    $authMiddleware = new AuthMiddleware();
 
-    
-        // $router->get('/review/{reviewId}', [$authMiddleware], function ($request, $reviewId) use ($userController) {
-        //     $userController->getReviewById(['review_id' => $reviewId]);
-        // });
-    
-        // $router->get('/reviews', [$authMiddleware], function ($request) use ($userController) {
-        //     $userController->getAllReviews();
-        // });
-    
-
-    $userValidation = new InputValidationMiddleware([
-        'email' => 'required|email',
-        'password' => 'required',
-        'username' => 'required',
-        'firstname' => 'required',
-        'lastname' => 'required',
-        'profile_image' => 'required'
+    $reviewValidation = new InputValidationMiddleware([
+        'description' => 'required',
+        'rating' => 'required|integer|min:1|max:5',
+        'driver_id' => 'required|integer'
     ]);
-        
 
     $userController = new UserController();
     $authMiddleware = new AuthMiddleware();
 
-    
-    
+    $router->post('/review/add', [$authMiddleware, $reviewValidation], function ($request) use ($userController) {
+        $userController->addReview($request);
+    });
+
+    $router->get('/reviews/driver/{driverId}', [$authMiddleware], function ($request, $driverId) use ($userController) {
+        $userController->getReviewsByDriverId(['driver_id' => $driverId]);
+    });
+
+
+    // $router->get('/review/{reviewId}', [$authMiddleware], function ($request, $reviewId) use ($userController) {
+    //     $userController->getReviewById(['review_id' => $reviewId]);
+    // });
+
+    // $router->get('/reviews', [$authMiddleware], function ($request) use ($userController) {
+    //     $userController->getAllReviews();
+    // });
+
 
     $router->get('/users', [$authMiddleware], function ($request) use ($userController) {
         $userController->getAllUsers();
@@ -58,17 +44,8 @@ function registerUserRouter(Router $router)
     $router->get('/users/{id}', [$authMiddleware], function ($request, $id) use ($userController) {
         $userController->getUserById($id);
     });
-//Get driver details
+    //Get driver details
     $router->get('/users/{id}/details', [$authMiddleware], function ($request, $id) use ($userController) {
         $userController->getUserDetails($id);
     });
-
-    
-
-    
-    
 }
-
-
-
-?>
