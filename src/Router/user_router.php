@@ -34,6 +34,41 @@ function registerUserRouter(Router $router)
         //     $userController->getAllReviews();
         // });
     
+
+    $userValidation = new InputValidationMiddleware([
+        'email' => 'required|email',
+        'password' => 'required',
+        'username' => 'required',
+        'firstname' => 'required',
+        'lastname' => 'required',
+        'profile_image' => 'required'
+    ]);
         
-    }
+
+    $userController = new UserController();
+    $authMiddleware = new AuthMiddleware();
+
+    
+    
+
+    $router->get('/users', [$authMiddleware], function ($request) use ($userController) {
+        $userController->getAllUsers();
+    });
+
+    $router->get('/users/{id}', [$authMiddleware], function ($request, $id) use ($userController) {
+        $userController->getUserById($id);
+    });
+//Get driver details
+    $router->get('/users/{id}/details', [$authMiddleware], function ($request, $id) use ($userController) {
+        $userController->getUserDetails($id);
+    });
+
+    
+
+    
+    
 }
+
+
+
+?>
