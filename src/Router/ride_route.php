@@ -7,7 +7,6 @@ use App\Middleware\AuthMiddleware;
 
 function registerRideRoutes(Router $router)
 {
-    // Instantiate the necessary controller and middleware
     $rideController = new RideController();
     $authMiddleware = new AuthMiddleware();
     $rideValidation = new InputValidationMiddleware([
