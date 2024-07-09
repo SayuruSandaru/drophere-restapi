@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/src/Router/Router.php'; 
-require_once __DIR__ . '/src/Controller/AuthController.php'; 
+require_once __DIR__ . '/src/Router/Router.php';
+require_once __DIR__ . '/src/Controller/AuthController.php';
 require_once __DIR__ . '/src/Service/AuthService.php';
 require_once __DIR__ . '/src/Utility/ResponseUtility.php';
 
@@ -9,7 +9,7 @@ require_once __DIR__ . '/src/Repository/AuthRepository.php';
 
 require_once __DIR__ . '/src/Service/UserService.php';
 require_once __DIR__ . '/src/Controller/UserController.php';
-require_once __DIR__ . '/src/Repository/UserRepository.php';  
+require_once __DIR__ . '/src/Repository/UserRepository.php';
 require_once __DIR__ . '/src/Service/RideService.php';
 
 require_once __DIR__ . '/src/Repository/RideRepository.php';
