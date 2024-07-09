@@ -15,20 +15,23 @@ class RideRepository
     }
 
 
-    public function createRide($driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id)
+    public function createRide($driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id, $passenger_count)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO ride (driver_id, status, start_time, current_location, route, start_location, end_location, vehicle_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $this->DB->prepare("INSERT INTO ride (driver_id, status, start_time, current_location, route, start_location, end_location, vehicle_id, passenger_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new Exception("Failed to prepare the SQL statement: " . $this->DB->error);
             }
-            $stmt->bind_param("issssssi", $driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id);
+            $stmt->bind_param("issssssii", $driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id, $passenger_count);
             $stmt->execute();
             if ($stmt->affected_rows == 0) {
                 throw new Exception("Error in creating ride: No rows affected.");
             }
             $id = $this->DB->insert_id;
-            return true;
+            return [
+                'status' => true,
+                'message' => 'Ride created successfully'
+            ];
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new Exception("Database error: " . $e->getMessage());
@@ -37,6 +40,7 @@ class RideRepository
             throw new Exception("General error: " . $e->getMessage());
         }
     }
+
 
 
 

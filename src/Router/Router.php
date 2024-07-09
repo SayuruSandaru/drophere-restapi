@@ -37,7 +37,6 @@ class Router
         $route = $this->matchRoute($method, $path);
 
         if ($route) {
-            // Initialize the request array and decode the JSON body if present
             $request = array_merge($_GET, $_POST);
             $jsonRequestBody = json_decode(file_get_contents('php://input'), true);
             if (is_array($jsonRequestBody)) {
@@ -46,7 +45,6 @@ class Router
 
             $params = $route['params'];
 
-            // Define the final action to call the callback
             $next = function ($req) use ($route, $params) {
                 if (is_callable($route['callback'])) {
                     call_user_func($route['callback'], $req, ...array_values($params));
@@ -55,7 +53,6 @@ class Router
                 }
             };
 
-            // Process middlewares
             $processMiddlewares = function ($middlewares, $request, $next) {
                 $lastCallable = $next;
                 while ($middleware = array_pop($middlewares)) {
@@ -70,7 +67,6 @@ class Router
                 return $lastCallable($request);
             };
 
-            // Start processing middlewares
             $processMiddlewares($route['middlewares'], $request, $next);
         } else {
             header("HTTP/1.0 404 Not Found");
