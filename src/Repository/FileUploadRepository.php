@@ -4,29 +4,59 @@ namespace App\Repository;
 
 require 'vendor/autoload.php';
 
-use App\Utility\AWSConfig;
-use Aws\Exception\AwsException;
-
 class FileUploadRepository
 {
+    private $cloudName = "dckifek20";
+    private $apiKey = "893773612382249";
+    private $apiSecret = "4nqFZSc2EDbtNZfFTxI-Sq5OGeo";
+
+    // public function __construct($cloudName, $apiKey, $apiSecret)
+    // {
+    //     $this->cloudName = $cloudName;
+    //     $this->apiKey = $apiKey;
+    //     $this->apiSecret = $apiSecret;
+    // }
+
     public function uploadFile($file)
     {
-        try {
-            $s3 = AWSConfig::getS3Client();
-            $bucket = 'drophere-bucket';
+        $timestamp = time();
+        $signature = sha1("timestamp={$timestamp}{$this->apiSecret}");
 
-            $filePath = $file['tmp_name'];
-            $fileName = basename($file['name']);
-            $result = $s3->putObject([
-                'Bucket' => $bucket,
-                'Key'    => $fileName,
-                'SourceFile' => $filePath,
-                // 'ACL'    => 'public-read'
-            ]);
+        $image_path = $file['tmp_name'];
+        $boundary = uniqid();
+        $eol = "\r\n";
 
-            return $result['ObjectURL'];
-        } catch (AwsException $e) {
-            throw new \Exception($e->getMessage());
+        $body = "--$boundary$eol";
+        $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"" . basename($file['name']) . "\"$eol";
+        $body .= "Content-Type: " . $file['type'] . $eol . $eol;
+        $body .= file_get_contents($image_path) . $eol;
+        $body .= "--$boundary$eol";
+        $body .= "Content-Disposition: form-data; name=\"api_key\"$eol$eol";
+        $body .= $this->apiKey . $eol;
+        $body .= "--$boundary$eol";
+        $body .= "Content-Disposition: form-data; name=\"timestamp\"$eol$eol";
+        $body .= $timestamp . $eol;
+        $body .= "--$boundary$eol";
+        $body .= "Content-Disposition: form-data; name=\"signature\"$eol$eol";
+        $body .= $signature . $eol;
+        $body .= "--$boundary--";  // Close the body's multipart content
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: multipart/form-data; boundary={$boundary}",
+                'content' => $body
+            ]
+        ]);
+
+        $url = "https://api.cloudinary.com/v1_1/{$this->cloudName}/image/upload";
+        $response = file_get_contents($url, false, $context);
+
+        if ($response === false) {
+            throw new \Exception("Failed to upload the image");
         }
+
+        $responseArray = json_decode($response, true);
+        return $responseArray['secure_url'] ?? $responseArray['url'];
     }
 }
