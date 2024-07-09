@@ -41,7 +41,22 @@ class RideRepository
         }
     }
 
-
+    public function getRideByFilterDate($date)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM ride WHERE start_time = ?");
+            $stmt->bind_param("s", $date);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Ride not found");
+            }
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
 
 
     public function getAllRides()
@@ -78,7 +93,7 @@ class RideRepository
         }
     }
 
-    public function searchRides($pickup, $destination)
+    public function searchRides($pickup, $destination, $date, $passengerCount)
     {
         try {
             $rides = $this->getAllRides();
@@ -86,7 +101,12 @@ class RideRepository
 
             foreach ($rides as $ride) {
                 $routePoints = $this->decodePolyline($ride['route']);
-                if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
+                if (
+                    $this->isPointOnRoute($pickup, $routePoints) &&
+                    $this->isPointOnRoute($destination, $routePoints) &&
+                    ($ride['date'] === null || $ride['date'] === $date) &&
+                    $ride['capacity'] >= $passengerCount
+                ) {
                     $suggestedRides[] = $ride;
                 }
             }
@@ -97,6 +117,8 @@ class RideRepository
             throw new Exception("Error searching for rides: " . $e->getMessage());
         }
     }
+
+
 
     private function decodePolyline($encoded)
     {
