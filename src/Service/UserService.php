@@ -4,20 +4,21 @@ namespace App\Service;
 
 use App\Repository\UserRepository;
 
-class RideService
+
+class UserService
 {
-    private $disputeRepository;
+    private $userRepository;
 
     public function __construct()
     {
-        $this->disputeRepository = new DisputeRepository();
+        $this->userRepository = new UserRepository();
     }
 
 
-    public function createDispute($dispute_id, $status, $category, $email, $phone_no, $message)
+    public function createDispute($status, $category, $message, $userId)
     {
         try {
-            $res =  $this->disputeRepository->createDispute($dispute_id, $status, $category, $email, $phone_no, $message);
+            $res =  $this->userRepository->createDispute($userId, $category, $status, $message);
             if ($res) {
                 return [
                     'status' => true,
@@ -41,10 +42,10 @@ class RideService
     public function getAllDisputes()
     {
         try {
-            $dispute = $this->disputeRepository->getAllDisputes();
+            $dispute = $this->userRepository->getAllDisputes();
             return [
                 'status' => true,
-                'disputes' => $disputes
+                'disputes' => $dispute
             ];
         } catch (\Exception $e) {
             error_log($e->getMessage());
@@ -58,7 +59,7 @@ class RideService
     public function getdisputeById($dispute_id)
     {
         try {
-            $dispute = $this->disputeRepository->getdisputeById($dispute_id);
+            $dispute = $this->userRepository->getdisputeById($dispute_id);
             return [
                 'status' => true,
                 'dispute' => $dispute
@@ -73,21 +74,19 @@ class RideService
     }
 
     public function updateStatus($dispute_id, $status)
-{
-    try {
-        $result = $this->userRepository->updateStatus($dispute_id, $status);
-        return [
-            'status' => true,
-            'message' => 'Dispute status updated successfully'
-        ];
-    } catch (\Exception $e) {
-        error_log($e->getMessage());
-        return [
-            'status' => false,
-            'message' => $e->getMessage()
-        ];
+    {
+        try {
+            $result = $this->userRepository->updateStatus($dispute_id, $status);
+            return [
+                'status' => true,
+                'message' => 'Dispute status updated successfully'
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
     }
-}
-
-
 }

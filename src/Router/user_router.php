@@ -12,24 +12,22 @@ function registerUserRoutes(Router $router)
     $authMiddleware = new AuthMiddleware();
     $rideValidation = new InputValidationMiddleware([
         'category' => 'required',
-        'email' => 'required',
         'status' => 'required',
-        'phone_no' => 'required',
         'message' => 'required',
- 
+
     ]);
 
-    $router->post('/dispute/create', [$authMiddleware, $userValidation], function ($request) use ($userController) {
+    $router->post('/user/dispute/create', [$authMiddleware, $rideValidation], function ($request) use ($userController) {
         $userController->createDispute($request);
     });
-    $router->get('/dispute/{disputeId}', [$authMiddleware], function ($request, $disputeId) use ($userController) {
-        $userController->getDisputeById(['dispute_id' => $disputeId]);
+
+    $router->get('/user/dispute/{disputeId}', [$authMiddleware], function ($request, $disputeId) use ($userController) {
+        $userController->getDisputeById($disputeId);
     });
-    $router->get('/disputes', [$authMiddleware], function ($request) use ($userController) {
+    $router->get('/user/disputes', [$authMiddleware], function ($request) use ($userController) {
         $userController->getAllDisputes();
     });
-    $router->post('/dispute/status', [$authMiddleware], function ($request) use ($userController) {
+    $router->post('/user/dispute/status', [$authMiddleware], function ($request) use ($userController) {
         $userController->updateStatus($request);
     });
-
 }

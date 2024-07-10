@@ -13,12 +13,11 @@ class UserController
     {
         $this->userService = new UserService();
     }
-    
-    public function getDisputeById($request)
+
+    public function getDisputeById($dispute_id)
     {
-        $dispute_id = $request['dispute_id'];
         $res = $this->userService->getDisputeById($dispute_id);
-        
+
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_SUCCESS,
@@ -33,17 +32,15 @@ class UserController
             );
         }
     }
-    
+
     public function createDispute($request)
     {
-        $dispute_id = $request['dispute_id'];
+        $userId = $request['userId'];
         $status = $request['status'];
         $category = $request['category'];
-        $email = $request['email'];
-        $phone_no = $request['phone_no'];
         $message = $request['message'];
-    
-        $res = $this->userService->createDispute($dispute_id, $status, $category, $email, $phone_no, $message);
+
+        $res = $this->userService->createDispute($status, $category, $message, $userId);
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
@@ -59,11 +56,11 @@ class UserController
             );
         }
     }
-    
+
     public function getAllDisputes()
     {
         $res = $this->userService->getAllDisputes();
-    
+
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_SUCCESS,
@@ -78,18 +75,17 @@ class UserController
             );
         }
     }
-    
+
     public function updateStatus($request)
     {
         $dispute_id = $request['dispute_id'];
         $status = $request['status'];
 
         $res = $this->userService->updateStatus($dispute_id, $status);
-    
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_SUCCESS,
-                ['dispute' => $res['dispute']],
+                ['message' => "Status updated successfully"],
                 200
             );
         } else {
@@ -101,4 +97,3 @@ class UserController
         }
     }
 }
-?>
