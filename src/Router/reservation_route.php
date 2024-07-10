@@ -5,18 +5,19 @@ use App\Middleware\InputValidationMiddleware;
 use App\Controller\ReservationController;
 use App\Middleware\AuthMiddleware;
 
-function reservationRoutes(Router $router)
+function registerReservationRoutes(Router $router)
 {
     $reservationController = new ReservationController();
     $authMiddleware = new AuthMiddleware();
-    $driverValidation = new InputValidationMiddleware([
+    $reservationValidation = new InputValidationMiddleware([
         'driver_id' => 'required',
         'ride_id' => 'required',
         'status' => 'required',
         'price' => 'required',
+        'passenger_count' => 'required',
     ]);
 
-    $router->post('/reservation/create', [$authMiddleware, $driverValidation], function ($request) use ($reservationController) {
+    $router->post('/reservation/create', [$authMiddleware, $reservationValidation], function ($request) use ($reservationController) {
         $reservationController->createPassangerReservation($request);
     });
 }

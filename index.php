@@ -43,6 +43,11 @@ require_once __DIR__ . '/src/Utility/cors.php';
 require_once __DIR__ . '/src/Router/ride_route.php';
 require_once __DIR__ . '/src/Router/user_router.php';
 
+require_once __DIR__ . '/src/Router/reservation_route.php';
+require_once __DIR__ . '/src/Repository/ReservationRepository.php';
+require_once __DIR__ . '/src/Service/ReservationService.php';
+require_once __DIR__ . '/src/Controller/ReservationController.php';
+
 use App\Router\Router;
 
 $router = new Router();
@@ -53,5 +58,6 @@ registerDriverRoutes($router);
 registerVehicleRoutes($router);
 registerRideRoutes($router);
 registerUserRouter($router);
+registerReservationRoutes($router);
 
 $router->dispatch();
