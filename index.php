@@ -47,6 +47,7 @@ require_once __DIR__ . '/src/Router/reservation_route.php';
 require_once __DIR__ . '/src/Repository/ReservationRepository.php';
 require_once __DIR__ . '/src/Service/ReservationService.php';
 require_once __DIR__ . '/src/Controller/ReservationController.php';
+require_once __DIR__ . '/src/Router/user_router.php';
 
 use App\Router\Router;
 
