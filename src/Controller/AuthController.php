@@ -21,12 +21,14 @@ class AuthController
             $password = $data['password'];
             $user = $this->authenticationService->login($email, $password);
             if ($user['status']) {
-                $token = $this->authenticationService->generateToken($user['user']);
+                // $token = $this->authenticationService->generateToken($user['user']);
+                $_SESSION['user_id'] = $user['user']['id'];
+                $_SESSION['username'] = $user['user']['username'];
+                $_SESSION['loggedin'] = true;
                 ResponseUtility::sendJsonResponse(
                     ResponseUtility::STATUS_SUCCESS,
                     [
                         "message" => "User logged in successfully",
-                        "token" => $token,
                     ],
                     200
                 );

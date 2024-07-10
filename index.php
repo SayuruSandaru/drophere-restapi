@@ -31,7 +31,7 @@ require_once __DIR__ . '/src/Middleware/FileUploadValidationMiddleware.php';
 require_once __DIR__ . '/src/Controller/FileUploadController.php';
 require_once __DIR__ . '/src/Repository/FileUploadRepository.php';
 require_once __DIR__ . '/src/Middleware/InputValidationMiddleware.php';
-require_once __DIR__ . '/src/Service/JWTService.php';
+// require_once __DIR__ . '/src/Service/JWTService.php';
 
 require_once __DIR__ . '/src/Service/FileUploadService.php';
 
@@ -44,6 +44,8 @@ require_once __DIR__ . '/src/Router/ride_route.php';
 require_once __DIR__ . '/src/Router/user_router.php';
 
 use App\Router\Router;
+
+session_start();
 
 $router = new Router();
 
