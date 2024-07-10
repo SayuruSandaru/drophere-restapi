@@ -60,7 +60,8 @@ class AuthController
             $lastname = $data['lastname'];
             $username = $data['username'];
             $phone = $data['phone'];
-            $user = $this->authenticationService->register($username, $password, $firstname, $lastname, $email, $phone);
+            $profile_image = $data['profile_image'];
+            $user = $this->authenticationService->register($username, $password, $firstname, $lastname, $email, $phone, $profile_image);
             if ($user['status']) {
                 ResponseUtility::sendJsonResponse(
                     ResponseUtility::STATUS_SUCCESS,

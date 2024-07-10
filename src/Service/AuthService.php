@@ -3,25 +3,26 @@
 namespace App\Service;
 
 use App\Repository\AuthRepository;
-use Firebase\JWT\JWT;
 
 class AuthService
 {
     private $secretKey = "drophere-iit10-secret-key";
     private $algorithm = "HS256";
     private $authenticationRepository;
+    private $token;
 
     public function __construct()
     {
         $this->authenticationRepository = new AuthRepository();
+        $this->token = new JWTService();
     }
 
     public function generateToken($user)
     {
         $issuedAt = time();
-        $expirationTime = $issuedAt + 3600 * 24;
+        $expirationTime = $issuedAt + 3600 * 24 * 30; // Token valid for 30 days
         $payload = array(
-            'userid' => $user['userid'],
+            'userid' => $user['id'],
             'email' => $user['email'],
             'firstname' => $user['firstname'],
             'lastname' => $user['lastname'],
@@ -31,23 +32,40 @@ class AuthService
             'exp' => $expirationTime
         );
 
-        return JWT::encode($payload, $this->secretKey, $this->algorithm);
+        return $this->token->encode($payload);
     }
 
     public function validateToken($token): array
     {
         try {
-            $payload = JWT::decode($token, $this->secretKey, [$this->algorithm]);
-            return [
-                "status" => true,
-                "data" => (array) $payload
-            ];
+            $decodedPayload = $this->token->decode($token);
+            if ($decodedPayload !== null) {
+                return [
+                    "status" => true,
+                    "data" => $decodedPayload
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Token validation failed or token expired"
+                ];
+            }
         } catch (\Exception $e) {
             return [
                 "status" => false,
                 "message" => $e->getMessage()
             ];
         }
+    }
+
+
+    public function getUserIdFromToken($token)
+    {
+        $decodedPayload = $this->token->decode($token);
+        if ($decodedPayload !== null && isset($decodedPayload['userid'])) {
+            return $decodedPayload['userid'];
+        }
+        return null; // Or handle as per your error management strategy
     }
 
     public function login($username, $password)
@@ -74,11 +92,10 @@ class AuthService
         }
     }
 
-    public function register($username, $password, $firstname, $lastname, $email, $phone)
+    public function register($username, $password, $firstname, $lastname, $email, $phone, $profile_image)
     {
         try {
-
-            $user = $this->authenticationRepository->register($email, $password, $firstname, $lastname, $username, $phone,);
+            $user = $this->authenticationRepository->register($email, $password, $firstname, $lastname, $username, $phone, $profile_image);
             if ($user !== NULL) {
                 return [
                     "status" => true,

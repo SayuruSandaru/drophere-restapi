@@ -3,13 +3,12 @@
 namespace App\Middleware;
 
 use App\Utility\ResponseUtility;
-use App\Middleware\MiddlewareBase;
 
-class InputValidationMiddleware extends MiddlewareBase
+class InputValidationMiddleware
 {
     private $rules;
 
-    public function __construct($rules)
+    public function __construct(array $rules)
     {
         $this->rules = $rules;
     }
@@ -17,18 +16,37 @@ class InputValidationMiddleware extends MiddlewareBase
     public function handle($request, $next)
     {
         $data = json_decode(file_get_contents('php://input'), true);
+        if ($data === null) {
+            $data = [];
+        }
 
-        foreach ($this->rules as $key => $rule) {
-            if (!isset($data[$key])) {
-                ResponseUtility::sendJsonResponse(['status' => 'error', 'message' => 'Invalid data, ' . $key . ' is required'], 400);
-                return false;
-            }
-            if ($rule === 'email' && !filter_var($data[$key], FILTER_VALIDATE_EMAIL)) {
-                ResponseUtility::sendJsonResponse(['status' => 'ailure', 'message' => $key . ' is not a valid mail'], 400);
-                return false;
+
+        $request = array_merge($request, $data);
+
+
+        $errors = $this->validate($request);
+
+
+        if (!empty($errors)) {
+            ResponseUtility::sendJsonResponse(ResponseUtility::STATUS_ERROR, ['errors' => $errors], 400);
+            return false;
+        }
+
+        return $next($request);
+    }
+
+    private function validate($request)
+    {
+        $errors = [];
+
+        foreach ($this->rules as $field => $rule) {
+            if ($rule === 'required' && empty($request[$field])) {
+                $errors[$field] = $field . ' is required';
+            } elseif ($rule === 'email' && isset($request[$field]) && !filter_var($request[$field], FILTER_VALIDATE_EMAIL)) {
+                $errors[$field] = $field . ' must be a valid email address';
             }
         }
 
-        return $next();
+        return $errors;
     }
 }
