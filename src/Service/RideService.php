@@ -47,6 +47,22 @@ class RideService
     {
         try {
             $ride = $this->rideRepository->getRideById($ride_id);
+            if (empty($ride)) {
+                return [
+                    'status' => false,
+                    'message' => 'Ride not found'
+                ];
+            }
+            $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
+            $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+            if ($ownerDetails) {
+                $ride['owner_details'] = $ownerDetails;
+            }
+
+            if ($vehicleDetails) {
+                $ride['vehicle_details'] = $vehicleDetails;
+            }
+
             return [
                 'status' => true,
                 'ride' => $ride
@@ -59,6 +75,7 @@ class RideService
             ];
         }
     }
+
 
     public function getAllRides()
     {
