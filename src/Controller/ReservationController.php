@@ -48,4 +48,60 @@ class ReservationController
             );
         }
     }
+
+    public function getAvailableReservations($status)
+    {
+        try {
+
+            $result = $this->reservationService->getAvailableReservations($status);
+            if ($result['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    ['data' => $result['data']],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    ['message' => $result['message']],
+                    200
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => 'Failed to retrieve available reservations: ' . $e->getMessage()],
+                200
+            );
+        }
+    }
+
+
+    public function updateReservationStatus($reservationId, $newStatus)
+    {
+        try {
+            $result = $this->reservationService->updateReservationStatus($reservationId, $newStatus);
+            if ($result['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    ['message' => "updated reservation status successfully"],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    ['message' => $result['message']],
+                    200
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => 'Failed to update reservation status: ' . $e->getMessage()],
+                200
+            );
+        }
+    }
 }
