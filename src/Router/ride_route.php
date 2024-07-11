@@ -7,7 +7,6 @@ use App\Middleware\AuthMiddleware;
 
 function registerRideRoutes(Router $router)
 {
-    // Instantiate the necessary controller and middleware
     $rideController = new RideController();
     $authMiddleware = new AuthMiddleware();
     $rideValidation = new InputValidationMiddleware([
@@ -21,22 +20,28 @@ function registerRideRoutes(Router $router)
         'end_location' => 'required',
     ]);
 
-    // Create a new ride
+    $directionsValidation = new InputValidationMiddleware([
+        'pickup_lat' => 'required',
+        'pickup_lng' => 'required',
+        'destination_lat' => 'required',
+        'destination_lng' => 'required',
+    ]);
+
     $router->post('/ride/create', [$authMiddleware, $rideValidation], function ($request) use ($rideController) {
         $rideController->createRide($request);
     });
-
-    // Get ride details by ID
     $router->get('/ride/{rideId}', [$authMiddleware], function ($request, $rideId) use ($rideController) {
         $rideController->getRideById(['ride_id' => $rideId]);
     });
-
-    // Get all rides
     $router->get('/rides', [$authMiddleware], function ($request) use ($rideController) {
         $rideController->getAllRides();
     });
 
     $router->post('/rides/search', [$authMiddleware], function ($request) use ($rideController) {
         $rideController->searchRides($request);
+    });
+
+    $router->post('/rides/direction', [$authMiddleware, $directionsValidation], function ($request) use ($rideController) {
+        $rideController->getDirections($request);
     });
 }

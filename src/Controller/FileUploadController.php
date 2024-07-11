@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Service\FileUploadService;
 use App\Utility\ResponseUtility;
-use AWS\CRT\HTTP\Response;
 
 class FileUploadController
 {

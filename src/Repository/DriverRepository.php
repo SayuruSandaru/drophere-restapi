@@ -86,7 +86,25 @@ class DriverRepository
             $stmt->execute();
             $result = $stmt->get_result();
             if ($result->num_rows == 0) {
-                throw new Exception("Driver not found");
+                return null;
+            }
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+
+    public function findByUserId($userId)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM drivers WHERE user_id = ?");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                return null;
             }
             return $result->fetch_assoc();
         } catch (\mysqli_sql_exception $e) {

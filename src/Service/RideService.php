@@ -19,10 +19,10 @@ class RideService
         $this->vehicleRepository = new VehicleRepository();
     }
 
-    public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id)
+    public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id, $passngerCount)
     {
         try {
-            $res =  $this->rideRepository->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id);
+            $res =  $this->rideRepository->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id, $passngerCount);
             if ($res) {
                 return [
                     'status' => true,
@@ -77,31 +77,60 @@ class RideService
         }
     }
 
-    public function searchRides($pickup, $destination)
+    public function searchRides($pickup, $destination, $date, $passngerCountr)
     {
+
         $rides = $this->rideRepository->getAllRides();
         $suggestedRides = [];
 
         foreach ($rides as $ride) {
             $routePoints = $this->decodePolyline($ride['route']);
 
-            // Check if both pickup and destination points are on the route
             if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
-                // Fetch ride owner details
                 $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
                 $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+                $fee = $this->rideRepository->calculateFee($pickup, $destination, $vehicleDetails['type']);
+
                 if ($ownerDetails) {
                     $ride['owner_details'] = $ownerDetails;
                 }
                 if ($vehicleDetails) {
                     $ride['vehicle_details'] = $vehicleDetails;
                 }
-
+                if ($fee) {
+                    $ride['fee'] = $fee['fee'];
+                    $ride['distance'] = $fee['distance'];
+                }
                 $suggestedRides[] = $ride;
             }
         }
 
         return $suggestedRides;
+    }
+
+    public function getDirections($pickup, $destination)
+    {
+        try {
+            $res = $this->rideRepository->getDirections($pickup, $destination);
+            if (empty($res)) {
+                return [
+                    'status' => false,
+                    'message' => 'No directions found'
+                ];
+            } else {
+
+                return [
+                    'status' => true,
+                    'directions' => $res
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
     }
 
     private function decodePolyline($polyline)

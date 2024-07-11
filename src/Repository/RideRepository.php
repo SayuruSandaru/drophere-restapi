@@ -15,20 +15,23 @@ class RideRepository
     }
 
 
-    public function createRide($driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id)
+    public function createRide($driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id, $passenger_count)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO ride (driver_id, status, start_time, current_location, route, start_location, end_location, vehicle_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $this->DB->prepare("INSERT INTO ride (driver_id, status, start_time, current_location, route, start_location, end_location, vehicle_id, passenger_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new Exception("Failed to prepare the SQL statement: " . $this->DB->error);
             }
-            $stmt->bind_param("issssssi", $driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id);
+            $stmt->bind_param("issssssii", $driver_id, $status, $start_time, $current_location, $route, $start_location, $end_location, $vehicle_id, $passenger_count);
             $stmt->execute();
             if ($stmt->affected_rows == 0) {
                 throw new Exception("Error in creating ride: No rows affected.");
             }
             $id = $this->DB->insert_id;
-            return true;
+            return [
+                'status' => true,
+                'message' => 'Ride created successfully'
+            ];
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new Exception("Database error: " . $e->getMessage());
@@ -38,6 +41,22 @@ class RideRepository
         }
     }
 
+    public function getRideByFilterDate($date)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM ride WHERE start_time = ?");
+            $stmt->bind_param("s", $date);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Ride not found");
+            }
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
 
 
     public function getAllRides()
@@ -74,7 +93,7 @@ class RideRepository
         }
     }
 
-    public function searchRides($pickup, $destination)
+    public function searchRides($pickup, $destination, $date, $passengerCount)
     {
         try {
             $rides = $this->getAllRides();
@@ -82,7 +101,12 @@ class RideRepository
 
             foreach ($rides as $ride) {
                 $routePoints = $this->decodePolyline($ride['route']);
-                if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
+                if (
+                    $this->isPointOnRoute($pickup, $routePoints) &&
+                    $this->isPointOnRoute($destination, $routePoints) &&
+                    ($ride['date'] === null || $ride['date'] === $date) &&
+                    $ride['capacity'] >= $passengerCount
+                ) {
                     $suggestedRides[] = $ride;
                 }
             }
@@ -93,6 +117,8 @@ class RideRepository
             throw new Exception("Error searching for rides: " . $e->getMessage());
         }
     }
+
+
 
     private function decodePolyline($encoded)
     {
@@ -158,5 +184,134 @@ class RideRepository
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c;
+    }
+
+    public function calculateFee($pickup, $destination, $vehicleType)
+    {
+        $distance = $this->getRoadDistance($pickup, $destination);
+        $fee = 0;
+        if ($vehicleType == 'bike') {
+            $fee = $distance * 5;
+        } else if ($vehicleType == 'tuktuk') {
+            $fee = $distance * 15;
+        } else if ($vehicleType == 'car') {
+            $fee = $distance * 20;
+        } else if ($vehicleType == 'van') {
+            $fee = $distance * 25;
+        } else {
+            $fee = $distance * 30;
+        }
+        $response = [
+            'fee' => $fee,
+            'distance' => $distance
+        ];
+        return $response;
+    }
+
+    public function getDirections($pickup, $destination)
+    {
+        $url = 'https://routes.googleapis.com/directions/v2:computeRoutes?key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac';
+
+        $data = array(
+            "origin" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $pickup['lat'],
+                        "longitude" => $pickup['lng']
+                    )
+                )
+            ),
+            "destination" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $destination['lat'],
+                        "longitude" => $destination['lng']
+                    )
+                )
+            ),
+            "travelMode" => "DRIVE",
+            "computeAlternativeRoutes" => true
+        );
+
+        $options = array(
+            'http' => array(
+                'header'  => "Content-Type: application/json\r\n" .
+                    "X-Goog-FieldMask: routes.polyline.encodedPolyline\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data),
+                'follow_location' => true,
+            ),
+        );
+
+        $context  = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
+
+        if ($response === FALSE) {
+            throw new Exception("Error fetching routes polylines.");
+        }
+        $data = json_decode($response, true);
+
+        if (isset($data['routes'])) {
+            $polylines = array_map(function ($route) {
+                return $route['polyline']['encodedPolyline'];
+            }, $data['routes']);
+
+            return $polylines;
+        } else {
+            throw new Exception("Error fetching routes polylines: No polyline data in response");
+        }
+    }
+
+
+    private function getRoadDistance($pickup, $destination)
+    {
+        $url = 'https://routes.googleapis.com/directions/v2:computeRoutes?key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac';
+
+        $data = array(
+            "origin" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $pickup['lat'],
+                        "longitude" => $pickup['lng']
+                    )
+                )
+            ),
+            "destination" => array(
+                "location" => array(
+                    "latLng" => array(
+                        "latitude" => $destination['lat'],
+                        "longitude" => $destination['lng']
+                    )
+                )
+            ),
+            "travelMode" => "DRIVE",
+            "computeAlternativeRoutes" => true
+        );
+
+        $options = array(
+            'http' => array(
+                'header'  => "Content-Type: application/json\r\n" .
+                    "X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data),
+                'follow_location' => true,
+            ),
+        );
+
+        $context  = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
+
+        if ($response === FALSE) {
+            throw new Exception("Error fetching road distance.");
+        }
+
+        $data = json_decode($response, true);
+
+        if (isset($data['routes'][0]['distanceMeters'])) {
+            $distance = $data['routes'][0]['distanceMeters'] / 1000; // Convert meters to kilometers
+            return $distance;
+        } else {
+            throw new Exception("Error fetching road distance: No distance data in response");
+        }
     }
 }
