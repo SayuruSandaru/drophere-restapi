@@ -97,14 +97,14 @@ class UserRepository
         }
     }
 
-    public function addReview($description, $rating, $driver_id)
+    public function addReview($description, $rating, $driver_id, $user_id)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO reviews (description, rating, driver_id) VALUES (?, ?, ?)");
+            $stmt = $this->DB->prepare("INSERT INTO reviews (description, rating, driver_id, user_id) VALUES (?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new \Exception("Failed to prepare statement: " . $this->DB->error);
             }
-            $stmt->bind_param("sii", $description, $rating, $driver_id);
+            $stmt->bind_param("siii", $description, $rating, $driver_id, $user_id);
             $stmt->execute();
             if ($stmt->affected_rows == 0) {
                 throw new \Exception("Error in adding review");
@@ -123,7 +123,15 @@ class UserRepository
     public function getReviewsByDriverId($driver_id)
     {
         try {
-            $stmt = $this->DB->prepare("SELECT * FROM reviews WHERE driver_id = ?");
+            $stmt = $this->DB->prepare("
+                SELECT r.review_id, r.description, r.rating, r.driver_id, u.username
+                FROM reviews r
+                JOIN users u ON r.user_id = u.id
+                WHERE r.driver_id = ?
+            ");
+            if ($stmt === false) {
+                throw new \Exception("Failed to prepare statement: " . $this->DB->error);
+            }
             $stmt->bind_param("i", $driver_id);
             $stmt->execute();
             $result = $stmt->get_result();

@@ -16,10 +16,10 @@ class UserService
         $this->driverRepository = new DriverRepository();
     }
 
-    public function addReview($description, $rating, $driver_id)
+    public function addReview($description, $rating, $driver_id, $userId)
     {
         try {
-            $review_Id = $this->userRepository->addReview($description, $rating, $driver_id);
+            $review_Id = $this->userRepository->addReview($description, $rating, $driver_id, $userId);
             if ($review_Id > 0) {
                 return [
                     'status' => true,

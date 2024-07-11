@@ -16,10 +16,11 @@ class UserController
 
     public function addReview($request)
     {
+        $userId = $request['userId'];
         $description = $request['description'];
         $rating = $request['rating'];
         $driver_id = $request['driver_id'];
-        $res = $this->userService->addReview($description, $rating, $driver_id);
+        $res = $this->userService->addReview($description, $rating, $driver_id, $userId);
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
