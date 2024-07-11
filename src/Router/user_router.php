@@ -53,4 +53,28 @@ function registerUserRouter(Router $router)
         $id = $request['userId'];
         $userController->getUserDetails($id);
     });
+
+    // Instantiate the necessary controller and middleware
+    $userController = new UserController();
+    $authMiddleware = new AuthMiddleware();
+    $rideValidation = new InputValidationMiddleware([
+        'category' => 'required',
+        'status' => 'required',
+        'message' => 'required',
+
+    ]);
+
+    $router->post('/user/dispute/create', [$authMiddleware, $rideValidation], function ($request) use ($userController) {
+        $userController->createDispute($request);
+    });
+
+    $router->get('/user/dispute/{disputeId}', [$authMiddleware], function ($request, $disputeId) use ($userController) {
+        $userController->getDisputeById($disputeId);
+    });
+    $router->get('/user/disputes', [$authMiddleware], function ($request) use ($userController) {
+        $userController->getAllDisputes();
+    });
+    $router->post('/user/dispute/status', [$authMiddleware], function ($request) use ($userController) {
+        $userController->updateStatus($request);
+    });
 }

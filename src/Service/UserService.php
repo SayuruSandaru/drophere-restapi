@@ -16,10 +16,10 @@ class UserService
         $this->driverRepository = new DriverRepository();
     }
 
-    public function addReview($description, $rating, $driver_id)
+    public function addReview($description, $rating, $driver_id, $userId)
     {
         try {
-            $review_Id = $this->userRepository->addReview($description, $rating, $driver_id);
+            $review_Id = $this->userRepository->addReview($description, $rating, $driver_id, $userId);
             if ($review_Id > 0) {
                 return [
                     'status' => true,
@@ -156,6 +156,82 @@ class UserService
             echo $e->getMessage();
             error_log($e->getMessage());
             return ['status' => false, 'message' => 'Error retrieving user details'];
+        }
+    }
+
+
+    public function createDispute($status, $category, $message, $userId)
+    {
+        try {
+            $res =  $this->userRepository->createDispute($userId, $category, $status, $message);
+            if ($res) {
+                return [
+                    'status' => true,
+                    'message' => 'Dispute created successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Error in creating Dispute'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getAllDisputes()
+    {
+        try {
+            $dispute = $this->userRepository->getAllDisputes();
+            return [
+                'status' => true,
+                'disputes' => $dispute
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getdisputeById($dispute_id)
+    {
+        try {
+            $dispute = $this->userRepository->getdisputeById($dispute_id);
+            return [
+                'status' => true,
+                'dispute' => $dispute
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateStatus($dispute_id, $status)
+    {
+        try {
+            $result = $this->userRepository->updateStatus($dispute_id, $status);
+            return [
+                'status' => true,
+                'message' => 'Dispute status updated successfully'
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
         }
     }
 }

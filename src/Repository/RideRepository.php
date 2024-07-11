@@ -201,6 +201,7 @@ class RideRepository
         } else {
             $fee = $distance * 30;
         }
+        $fee = round($fee);
         $response = [
             'fee' => $fee,
             'distance' => $distance
