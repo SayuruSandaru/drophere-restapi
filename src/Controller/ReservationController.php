@@ -48,4 +48,41 @@ class ReservationController
             );
         }
     }
+
+    public function createDeliveryReservation($request)
+    {
+        try {
+            $userId = $request['userId'];
+            $driverId = $request['driver_id'];
+            $serviceId = $request['service_id'];
+            $recipientName = $request['recipient_name'];
+            $recipientAddress = $request['recipient_address'];
+            $recipientPhone = $request['recipient_phone'];
+            $signature = $request['signature'];
+            $weight = $request['weight'];
+
+            $res = $this->reservationService->createDeliveryReservation($userId, $driverId, $serviceId, $recipientName, $recipientAddress, $recipientPhone, $signature, $weight);
+
+            if ($res['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    ['message' => $res['message']],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    ['message' => $res['message']],
+                    200
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $e->getMessage()],
+                200
+            );
+        }
+    }
 }
