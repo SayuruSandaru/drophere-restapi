@@ -1,4 +1,5 @@
 <?php
+
 use App\Router\Router;
 use App\Middleware\InputValidationMiddleware;
 use App\Controller\ReservationController;
@@ -9,7 +10,6 @@ function registerReservationRoutes(Router $router)
     $reservationController = new ReservationController();
     $authMiddleware = new AuthMiddleware();
     $reservationValidation = new InputValidationMiddleware([
-     
         'driver_id' => 'required',
         'ride_id' => 'required',
         'status' => 'required',
@@ -22,13 +22,13 @@ function registerReservationRoutes(Router $router)
     });
 
     $deliveryReservationValidation = new InputValidationMiddleware([
-        'userId' => 'required', // Add userId
-        'driver_id' => 'required', // Add driverId
-        'service_id' => 'required',
+        'driver_id' => 'required',
+        'ride_id' => 'required',
+        'status' => 'required',
+        'price' => 'required',
         'recipient_name' => 'required',
         'recipient_address' => 'required',
         'recipient_phone' => 'required',
-        'signature' => 'required',
         'weight' => 'required',
     ]);
 

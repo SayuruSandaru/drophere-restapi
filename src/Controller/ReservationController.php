@@ -54,15 +54,25 @@ class ReservationController
         try {
             $userId = $request['userId'];
             $driverId = $request['driver_id'];
-            $serviceId = $request['service_id'];
+            $rideId = $request['ride_id'];
+            $status = $request['status'] ?? 'pending';
+            $price = $request['price'];
             $recipientName = $request['recipient_name'];
             $recipientAddress = $request['recipient_address'];
             $recipientPhone = $request['recipient_phone'];
-            $signature = $request['signature'];
             $weight = $request['weight'];
 
-            $res = $this->reservationService->createDeliveryReservation($userId, $driverId, $serviceId, $recipientName, $recipientAddress, $recipientPhone, $signature, $weight);
-
+            $res = $this->reservationService->createDeliveryReservation(
+                $userId,
+                $driverId,
+                $rideId,
+                $status,
+                $price,
+                $recipientName,
+                $recipientAddress,
+                $recipientPhone,
+                $weight
+            );
             if ($res['status']) {
                 ResponseUtility::sendJsonResponse(
                     ResponseUtility::STATUS_SUCCESS,

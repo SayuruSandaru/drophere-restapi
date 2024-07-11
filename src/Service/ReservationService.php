@@ -45,12 +45,12 @@ class ReservationService
         }
     }
 
-    public function createDeliveryReservation($userId, $driverId, $serviceId, $recipientName, $recipientAddress, $recipientPhone, $signature, $weight)
+    public function createDeliveryReservation($userId, $driverId, $rideId, $status, $price, $recipientName, $recipientAddress, $recipientPhone, $weight)
     {
         try {
-            $res = $this->reservationRepository->createReservationDelivery($userId, $driverId, $serviceId, $recipientName, $recipientAddress, $recipientPhone, $signature, $weight);
+            $res = $this->reservationRepository->createReservationPassanger($userId, $driverId, $rideId, $status, $price);
             if ($res > 0) {
-                $res2 = $this->reservationRepository->createDeliveryService($serviceId, $recipientName, $recipientAddress, $recipientPhone, $signature, $weight);
+                $res2 = $this->reservationRepository->createDeliveryService($recipientName, $recipientAddress, $recipientPhone, $weight);
                 if ($res2 > 0) {
                     return [
                         'status' => true,
