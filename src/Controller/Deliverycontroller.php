@@ -21,6 +21,7 @@ class DeliveryController
         $deliveryDate = $request['delivery_date'];
         $status = $request['status'];
 
+
         $res = $this->deliveryService->createDelivery($userId, $deliveryAddress, $deliveryDate, $status);
 
         if ($res['status']) {
@@ -33,7 +34,7 @@ class DeliveryController
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_ERROR,
                 ['message' => $res['message']],
-                400
+                200
             );
         }
     }
