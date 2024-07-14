@@ -1,15 +1,12 @@
 <?php
 
-
 namespace App\Service;
-
 
 use App\Repository\ReservationRepository;
 use App\Repository\RideRepository;
 
 class ReservationService
 {
-
     private $reservationRepository;
     private $riderepository;
     public function __construct()
@@ -99,6 +96,38 @@ class ReservationService
             return [
                 'status' => false,
                 'message' => 'Failed to update reservation status: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function createDeliveryReservation($userId, $driverId, $rideId, $status, $price, $recipientName, $recipientAddress, $recipientPhone, $weight, $type)
+    {
+        try {
+            $res = $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type);
+            if ($res > 0) {
+                $res2 = $this->reservationRepository->createDeliveryService($recipientName, $recipientAddress, $recipientPhone, $weight);
+                if ($res2 > 0) {
+                    return [
+                        'status' => true,
+                        'message' => 'Reservation created successfully'
+                    ];
+                } else {
+                    return [
+                        'status' => false,
+                        'message' => 'Error in creating delivery service entry'
+                    ];
+                }
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Error in creating reservation'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
             ];
         }
     }

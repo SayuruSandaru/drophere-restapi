@@ -38,4 +38,19 @@ function registerReservationRoutes(Router $router)
         $newStatus = $request['status'];
         $reservationController->updateReservationStatus($reservationId, $newStatus);
     });
+
+    $deliveryReservationValidation = new InputValidationMiddleware([
+        'driver_id' => 'required',
+        'ride_id' => 'required',
+        'status' => 'required',
+        'price' => 'required',
+        'recipient_name' => 'required',
+        'recipient_address' => 'required',
+        'recipient_phone' => 'required',
+        'weight' => 'required',
+    ]);
+
+    $router->post('/reservation/create/delivery', [$authMiddleware, $deliveryReservationValidation], function ($request) use ($reservationController) {
+        $reservationController->createDeliveryReservation($request);
+    });
 }
