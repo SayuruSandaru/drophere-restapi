@@ -51,6 +51,7 @@ function registerReservationRoutes(Router $router)
     ]);
 
     $router->post('/reservation/create/delivery', [$authMiddleware, $deliveryReservationValidation], function ($request) use ($reservationController) {
-        $reservationController->createDeliveryReservation($request);
+        $type = "delivery";
+        $reservationController->createDeliveryReservation($request, $type);
     });
 }

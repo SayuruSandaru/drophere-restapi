@@ -105,7 +105,7 @@ class ReservationController
         }
     }
 
-    public function createDeliveryReservation($request)
+    public function createDeliveryReservation($request, $type)
     {
         try {
             $userId = $request['userId'];
@@ -127,7 +127,8 @@ class ReservationController
                 $recipientName,
                 $recipientAddress,
                 $recipientPhone,
-                $weight
+                $weight,
+                $type
             );
             if ($res['status']) {
                 ResponseUtility::sendJsonResponse(
