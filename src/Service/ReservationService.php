@@ -4,15 +4,22 @@ namespace App\Service;
 
 use App\Repository\ReservationRepository;
 use App\Repository\RideRepository;
+use App\Repository\DriverRepository;
+use App\Repository\UserDetails;
+use App\Repository\UserRepository;
 
 class ReservationService
 {
     private $reservationRepository;
     private $riderepository;
+    private $driverRepository;
+    private $userRepository;
     public function __construct()
     {
         $this->riderepository = new RideRepository();
         $this->reservationRepository = new ReservationRepository();
+        $this->driverRepository = new DriverRepository();
+        $this->userRepository = new UserRepository();
     }
 
     public function createReservationPassanger($userId, $driverId, $rideId, $status, $price, $passengerCount, $type)
@@ -60,7 +67,11 @@ class ReservationService
 
             foreach ($reservations as $key => $reservation) {
                 $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
-                $reservations[$key]['ride'] = $rideDetails; // Append ride details to each reservation
+                $driverDetails = $this->driverRepository->getDriverById($reservation['driver_id']);
+                $reservations[$key]['driver'] = $driverDetails;
+                $userDetails = $this->userRepository->findById($reservation['user_id']);
+                $reservations[$key]['driver']['user'] = $userDetails;
+                $reservations[$key]['ride'] = $rideDetails;
             }
 
             return [
