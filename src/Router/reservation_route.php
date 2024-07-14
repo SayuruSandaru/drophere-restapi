@@ -24,7 +24,8 @@ function registerReservationRoutes(Router $router)
     ]);
 
     $router->post('/reservation/create', [$authMiddleware, $reservationValidation], function ($request) use ($reservationController) {
-        $reservationController->createPassangerReservation($request);
+        $type = "passenger";
+        $reservationController->createPassangerReservation($request, $type);
     });
 
     $router->post('/reservation/available', [$authMiddleware], function ($request) use ($reservationController) {

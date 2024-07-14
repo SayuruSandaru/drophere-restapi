@@ -14,7 +14,7 @@ class ReservationController
         $this->reservationService = new ReservationService();
     }
 
-    public function createPassangerReservation($request)
+    public function createPassangerReservation($request, $type)
     {
         try {
             $userId = $request['userId'];
@@ -24,7 +24,7 @@ class ReservationController
             $price = $request['price'];
             $passengerCount = $request['passenger_count'];
 
-            $res = $this->reservationService->createReservationPassanger($userId, $driverId, $rideId, $status, $price, $passengerCount);
+            $res = $this->reservationService->createReservationPassanger($userId, $driverId, $rideId, $status, $price, $passengerCount, $type);
 
             if ($res['status']) {
                 ResponseUtility::sendJsonResponse(

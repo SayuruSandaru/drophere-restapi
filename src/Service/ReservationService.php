@@ -18,10 +18,10 @@ class ReservationService
         $this->reservationRepository = new ReservationRepository();
     }
 
-    public function createReservationPassanger($userId, $driverId, $rideId, $status, $price, $passengerCount,)
+    public function createReservationPassanger($userId, $driverId, $rideId, $status, $price, $passengerCount, $type)
     {
         try {
-            $res =  $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price);
+            $res =  $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type);
             if ($res > 0) {
                 $res2 = $this->reservationRepository->createPassengerService($passengerCount, $res);
                 if ($res2 > 0) {

@@ -15,12 +15,12 @@ class ReservationRepository
         $this->DB = getDBConnection();
     }
 
-    public function createReservationPassenger($userId, $driverId, $rideId, $status, $price)
+    public function createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO reservation (user_id, driver_id, ride_id, status, price) 
-                                        VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("iiisd", $userId, $driverId, $rideId, $status, $price);
+            $stmt = $this->DB->prepare("INSERT INTO reservation (user_id, driver_id, ride_id, status, price, type) 
+                                        VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("iiisds", $userId, $driverId, $rideId, $status, $price, $type);
             $stmt->execute();
 
             if ($stmt->affected_rows == 0) {
