@@ -83,6 +83,29 @@ class RideController
         }
     }
 
+    public function getRideByStatus($request)
+    {
+        $status = $request['status'];
+
+        $res = $this->rideService->getRideByStatus($status);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => $res['rides']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                404
+            );
+        }
+    }
+
+
+
     public function searchRides($request)
     {
         $pickup = ['lat' => $request['pickup_lat'], 'lng' => $request['pickup_lng']];

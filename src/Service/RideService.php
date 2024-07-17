@@ -76,6 +76,50 @@ class RideService
         }
     }
 
+    public function getRideByStatus($status)
+    {
+        try {
+            $rides = $this->rideRepository->getRideByStatus($status);
+            if (count($rides) == 0) {
+                return [
+                    'status' => false,
+                    'message' => 'Ride not found'
+                ];
+            }
+
+            foreach ($rides as $key => $ride) {
+                if (!is_array($ride)) {
+                    continue;
+                }
+                $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
+                if ($ownerDetails) {
+                    $rides[$key]['owner_details'] = $ownerDetails;
+                } else {
+                    $rides[$key]['owner_details'] = 'Driver not found';
+                }
+                $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+                if ($vehicleDetails) {
+                    $rides[$key]['vehicle_details'] = $vehicleDetails;
+                } else {
+                    $rides[$key]['vehicle_details'] = 'Vehicle not found';
+                }
+            }
+
+            return [
+                'status' => true,
+                'rides' => $rides
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to retrieve rides: ' . $e->getMessage()
+            ];
+        }
+    }
+
+
+
 
     public function getAllRides()
     {
