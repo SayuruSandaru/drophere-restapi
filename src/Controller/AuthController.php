@@ -90,4 +90,49 @@ class AuthController
             );
         }
     }
+
+    public function updateUser($data)
+    {
+        try {
+            $email = $data['email'] ?? null;
+            if (!$email) {
+                throw new \Exception("Email is required");
+            }
+
+            $firstname = $data['firstname'] ?? null;
+            $lastname = $data['lastname'] ?? null;
+            $username = $data['username'] ?? null;
+            $phone = $data['phone'] ?? null;
+            $profile_image = $data['profile_image'] ?? null;
+
+            $user = $this->authenticationService->updateUser($email, $firstname, $lastname, $username, $phone, $profile_image);
+
+            if ($user['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    [
+                        "message" => "User updated successfully",
+                    ],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    [
+                        "message" => $user['message']
+                    ],
+                    400
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                [
+                    "message" => $e->getMessage()
+                ],
+                400
+            );
+        }
+    }
 }

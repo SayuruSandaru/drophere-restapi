@@ -69,4 +69,30 @@ class AuthRepository
             throw new Exception("Error in registering user");
         }
     }
+
+    public function updateUser($sql, $types, $params)
+    {
+        try {
+            $stmt = $this->DB->prepare($sql);
+            if ($stmt === false) {
+                throw new Exception('Prepare failed: ' . htmlspecialchars($this->DB->error));
+            }
+
+            // Dynamically bind the parameters
+            $stmt->bind_param($types, ...$params);
+
+            $stmt->execute();
+            if ($stmt->affected_rows === -1) {
+                throw new Exception('Execute failed: ' . htmlspecialchars($stmt->error));
+            }
+
+            $result = $stmt->affected_rows;
+            $stmt->close();
+
+            return $result > 0 ? $params[array_key_last($params)] : null;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Error in updating user");
+        }
+    }
 }

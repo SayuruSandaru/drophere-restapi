@@ -65,7 +65,7 @@ class AuthService
         if ($decodedPayload !== null && isset($decodedPayload['userid'])) {
             return $decodedPayload['userid'];
         }
-        return null; // Or handle as per your error management strategy
+        return null;
     }
 
     public function login($username, $password)
@@ -105,6 +105,73 @@ class AuthService
                 return [
                     "status" => false,
                     "message" => "Error in registering user"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateUser($email, $firstname = null, $lastname = null, $username = null, $phone = null, $profile_image = null)
+    {
+        try {
+
+            $fields = [];
+            $params = [];
+            $types = '';
+
+            if ($firstname !== null) {
+                $fields[] = "firstname = ?";
+                $params[] = $firstname;
+                $types .= 's';
+            }
+            if ($lastname !== null) {
+                $fields[] = "lastname = ?";
+                $params[] = $lastname;
+                $types .= 's';
+            }
+            if ($username !== null) {
+                $fields[] = "username = ?";
+                $params[] = $username;
+                $types .= 's';
+            }
+            if ($phone !== null) {
+                $fields[] = "phone = ?";
+                $params[] = $phone;
+                $types .= 's';
+            }
+            if ($profile_image !== null) {
+                $fields[] = "profile_image = ?";
+                $params[] = $profile_image;
+                $types .= 's';
+            }
+
+            if (empty($fields)) {
+                return [
+                    "status" => false,
+                    "message" => "No fields to update"
+                ];
+            }
+            $params[] = $email;
+            $types .= 's';
+
+            $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE email = ?";
+
+            $user = $this->authenticationRepository->updateUser($sql, $types, $params);
+
+            if ($user !== NULL) {
+                return [
+                    "status" => true,
+                    "userId" => $user
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Error in updating user"
                 ];
             }
         } catch (\Exception $e) {
