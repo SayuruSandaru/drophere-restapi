@@ -124,6 +124,28 @@ class RideRepository
         }
     }
 
+    public function deleteRide($ride_id)
+    {
+        try {
+            $stmt = $this->DB->prepare("DELETE FROM ride WHERE ride_id = ?");
+            $stmt->bind_param("i", $ride_id);
+            $stmt->execute();
+            if ($stmt->affected_rows == 0) {
+                throw new Exception("Error deleting ride: No rows affected.");
+            }
+            return [
+                'status' => true,
+                'message' => 'Ride deleted successfully'
+            ];
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
 
 
     public function getRideById($ride_id)

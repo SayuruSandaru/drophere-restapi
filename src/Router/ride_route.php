@@ -32,6 +32,10 @@ function registerRideRoutes(Router $router)
         'ride_id' => 'required',
     ]);
 
+    $rideDeleteValidation = new InputValidationMiddleware([
+        'ride_id' => 'required',
+    ]);
+
     $router->post('/ride/create', [$authMiddleware, $rideValidation], function ($request) use ($rideController) {
         $rideController->createRide($request);
     });
@@ -58,5 +62,9 @@ function registerRideRoutes(Router $router)
 
     $router->post('/rides/status', [$authMiddleware, $rideByStatusValidation], function ($request) use ($rideController) {
         $rideController->updateRide($request);
+    });
+
+    $router->post('/rides/delete', [$authMiddleware, $rideDeleteValidation], function ($request) use ($rideController) {
+        $rideController->deleteRide($request);
     });
 }

@@ -142,6 +142,30 @@ class RideService
         }
     }
 
+    public function deleteRide($ride_id)
+    {
+        try {
+            $res = $this->rideRepository->deleteRide($ride_id);
+            if ($res) {
+                return [
+                    'status' => true,
+                    'message' => 'Ride deleted successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Failed to delete ride'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to delete ride: ' . $e->getMessage()
+            ];
+        }
+    }
+
 
 
 

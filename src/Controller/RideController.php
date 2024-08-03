@@ -126,6 +126,27 @@ class RideController
         }
     }
 
+    public function deleteRide($request)
+    {
+        $ride_id = $request['ride_id'];
+
+        $res = $this->rideService->deleteRide($ride_id);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => $res['message']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                400
+            );
+        }
+    }
+
 
 
     public function searchRides($request)
