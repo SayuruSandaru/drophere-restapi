@@ -104,6 +104,28 @@ class RideController
         }
     }
 
+    public function updateRide($request)
+    {
+        $ride_id = $request['ride_id'];
+        $status = $request['status'];
+
+        $res = $this->rideService->updateRideStatus($ride_id, $status);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => $res['message']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                400
+            );
+        }
+    }
+
 
 
     public function searchRides($request)

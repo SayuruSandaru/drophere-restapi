@@ -102,6 +102,28 @@ class RideRepository
         }
     }
 
+    public function updateRideByStatus($ride_id, $status)
+    {
+        try {
+            $stmt = $this->DB->prepare("UPDATE ride SET status = ? WHERE ride_id = ?");
+            $stmt->bind_param("si", $status, $ride_id);
+            $stmt->execute();
+            if ($stmt->affected_rows == 0) {
+                throw new Exception("Error updating ride status: No rows affected.");
+            }
+            return [
+                'status' => true,
+                'message' => 'Ride status updated successfully'
+            ];
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
 
 
     public function getRideById($ride_id)
@@ -145,6 +167,8 @@ class RideRepository
             throw new Exception("Error searching for rides: " . $e->getMessage());
         }
     }
+
+
 
 
 

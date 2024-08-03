@@ -118,6 +118,30 @@ class RideService
         }
     }
 
+    public function updateRideStatus($ride_id, $status)
+    {
+        try {
+            $res = $this->rideRepository->updateRideByStatus($ride_id, $status);
+            if ($res) {
+                return [
+                    'status' => true,
+                    'message' => 'Ride status updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Failed to update ride status'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to update ride status: ' . $e->getMessage()
+            ];
+        }
+    }
+
 
 
 
