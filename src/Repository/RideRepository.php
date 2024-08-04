@@ -76,6 +76,32 @@ class RideRepository
         }
     }
 
+    public function getAllRidesByDriver($driver_id)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM ride WHERE driver_id = ?");
+            $stmt->bind_param("i", $driver_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Ride not found");
+            }
+
+            $rides = [];
+            while ($row = $result->fetch_assoc()) {
+                $rides[] = $row;
+            }
+
+            return $rides;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
     public function getRideByStatus($status)
     {
         try {

@@ -83,6 +83,27 @@ class RideController
         }
     }
 
+    public function getAllRidesBydriverId($request)
+    {
+        $driver_id = $request['driver_id'];
+
+        $res = $this->rideService->getAllRidesBydriverId($driver_id);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => $res['rides']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                500
+            );
+        }
+    }
+
     public function getRideByStatus($request)
     {
         $status = $request['status'];

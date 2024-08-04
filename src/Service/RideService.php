@@ -186,6 +186,23 @@ class RideService
         }
     }
 
+    public function getAllRidesByDriverId($driver_id)
+    {
+        try {
+            $rides = $this->rideRepository->getAllRidesByDriver($driver_id);
+            return [
+                'status' => true,
+                'rides' => $rides
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
     public function searchRides($pickup, $destination, $date, $passngerCountr)
     {
 

@@ -47,6 +47,10 @@ function registerRideRoutes(Router $router)
         'passenger_count' => 'required',
     ]);
 
+    $ridesByDriverIdValidation = new InputValidationMiddleware([
+        'driver_id' => 'required',
+    ]);
+
     $router->post('/ride/create', [$authMiddleware, $rideValidation], function ($request) use ($rideController) {
         $rideController->createRide($request);
     });
@@ -57,6 +61,10 @@ function registerRideRoutes(Router $router)
 
     $router->get('/rides', [$authMiddleware], function ($request) use ($rideController) {
         $rideController->getAllRides();
+    });
+
+    $router->post('/rides', [$authMiddleware, $ridesByDriverIdValidation], function ($request) use ($rideController) {
+        $rideController->getAllRidesBydriverId($request);
     });
 
     $router->post('/rides/search', [$authMiddleware], function ($request) use ($rideController) {
