@@ -217,6 +217,7 @@ class RideService
         return $suggestedRides;
     }
 
+
     public function getDirections($pickup, $destination)
     {
         try {

@@ -190,6 +190,31 @@ class RideRepository
         }
     }
 
+    public function searchByName($pickup, $destination, $date, $passengerCount)
+    {
+        try {
+            $rides = $this->getAllRides();
+            $suggestedRides = [];
+
+            foreach ($rides as $ride) {
+                $routePoints = $this->decodePolyline($ride['route']);
+                if (
+                    $this->isPointOnRoute($pickup, $routePoints) &&
+                    $this->isPointOnRoute($destination, $routePoints) &&
+                    ($ride['date'] === null || $ride['date'] === $date) &&
+                    $ride['capacity'] >= $passengerCount
+                ) {
+                    $suggestedRides[] = $ride;
+                }
+            }
+
+            return $suggestedRides;
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Error searching for rides: " . $e->getMessage());
+        }
+    }
+
 
 
 
