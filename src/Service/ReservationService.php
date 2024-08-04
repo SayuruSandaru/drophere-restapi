@@ -47,10 +47,10 @@ class ReservationService
         }
     }
 
-    public function getAvailableReservations($status)
+    public function getAvailableReservations($status, $userId)
     {
         try {
-            $reservations = $this->reservationRepository->getAvailableReservations($status);
+            $reservations = $this->reservationRepository->getAvailableReservations($status, $userId);
             if (count($reservations) == 0) {
                 return [
                     'status' => false,

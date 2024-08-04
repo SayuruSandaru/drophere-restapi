@@ -30,7 +30,8 @@ function registerReservationRoutes(Router $router)
 
     $router->post('/reservation/available', [$authMiddleware], function ($request) use ($reservationController) {
         $status = $request['status'];
-        $reservationController->getAvailableReservations($status);
+        $userId = $request['user_id'];
+        $reservationController->getAvailableReservations($status, $userId);
     });
 
     $router->post('/reservation/update', [$authMiddleware, $updateStatusValidation], function ($request) use ($reservationController) {

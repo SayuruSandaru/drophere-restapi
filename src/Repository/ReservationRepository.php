@@ -71,12 +71,12 @@ class ReservationRepository
         }
     }
 
-    public function getAvailableReservations($status)
+    public function getAvailableReservations($status, $user_id)
     {
         try {
             $stmt = $this->DB->prepare("SELECT * FROM reservation
-                                        WHERE reservation.status = ?");
-            $stmt->bind_param("s", $status);
+                                        WHERE reservation.status = ? AND reservation.user_id = ?");
+            $stmt->bind_param("si", $status, $user_id);
             $stmt->execute();
             $result = $stmt->get_result();
 
@@ -91,6 +91,7 @@ class ReservationRepository
             throw new Exception("Failed to retrieve available reservations with passenger service details: " . $e->getMessage());
         }
     }
+
 
 
     public function updateReservationStatus($reservationId, $newStatus)

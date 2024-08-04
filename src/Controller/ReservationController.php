@@ -49,11 +49,11 @@ class ReservationController
         }
     }
 
-    public function getAvailableReservations($status)
+    public function getAvailableReservations($status, $userId)
     {
         try {
 
-            $result = $this->reservationService->getAvailableReservations($status);
+            $result = $this->reservationService->getAvailableReservations($status, $userId);
             if ($result['status']) {
                 ResponseUtility::sendJsonResponse(
                     ResponseUtility::STATUS_SUCCESS,
