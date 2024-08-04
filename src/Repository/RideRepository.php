@@ -124,6 +124,43 @@ class RideRepository
         }
     }
 
+
+    public function searchByName($pickup, $destination, $date, $passengerCount)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM ride 
+                                    WHERE start_location = ? 
+                                      AND end_location = ? 
+                                      AND DATE(start_time) = ? 
+                                      AND passenger_count >= ? 
+                                      AND status = 'active'");
+            $stmt->bind_param("sssi", $pickup, $destination, $date, $passengerCount);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $rides = [];
+            while ($row = $result->fetch_assoc()) {
+                $rides[] = $row;
+            }
+            return $rides;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+
+
     public function deleteRide($ride_id)
     {
         try {
@@ -166,31 +203,6 @@ class RideRepository
     }
 
     public function searchRides($pickup, $destination, $date, $passengerCount)
-    {
-        try {
-            $rides = $this->getAllRides();
-            $suggestedRides = [];
-
-            foreach ($rides as $ride) {
-                $routePoints = $this->decodePolyline($ride['route']);
-                if (
-                    $this->isPointOnRoute($pickup, $routePoints) &&
-                    $this->isPointOnRoute($destination, $routePoints) &&
-                    ($ride['date'] === null || $ride['date'] === $date) &&
-                    $ride['capacity'] >= $passengerCount
-                ) {
-                    $suggestedRides[] = $ride;
-                }
-            }
-
-            return $suggestedRides;
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-            throw new Exception("Error searching for rides: " . $e->getMessage());
-        }
-    }
-
-    public function searchByName($pickup, $destination, $date, $passengerCount)
     {
         try {
             $rides = $this->getAllRides();

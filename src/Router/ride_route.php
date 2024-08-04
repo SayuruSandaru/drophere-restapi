@@ -36,6 +36,17 @@ function registerRideRoutes(Router $router)
         'ride_id' => 'required',
     ]);
 
+    $searchNameValidation = new InputValidationMiddleware([
+        'pickup_name' => 'required',
+        'destination_name' => 'required',
+        'pickup_lat' => 'required',
+        'pickup_lng' => 'required',
+        'destination_lat' => 'required',
+        'destination_lng' => 'required',
+        'date' => 'required',
+        'passenger_count' => 'required',
+    ]);
+
     $router->post('/ride/create', [$authMiddleware, $rideValidation], function ($request) use ($rideController) {
         $rideController->createRide($request);
     });
@@ -50,6 +61,10 @@ function registerRideRoutes(Router $router)
 
     $router->post('/rides/search', [$authMiddleware], function ($request) use ($rideController) {
         $rideController->searchRides($request);
+    });
+
+    $router->post('/rides/search/v1', [$authMiddleware, $searchNameValidation], function ($request) use ($rideController) {
+        $rideController->searchRidesByName($request);
     });
 
     $router->post('/rides/direction', [$authMiddleware, $directionsValidation], function ($request) use ($rideController) {

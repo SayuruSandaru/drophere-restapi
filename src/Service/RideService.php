@@ -217,6 +217,30 @@ class RideService
         return $suggestedRides;
     }
 
+    public function searchRidesByName($pickup, $destination, $date, $passengerCount, $pickupCoordinates, $destinationCoordinates)
+    {
+        $rides = $this->rideRepository->searchByName($pickup, $destination, $date, $passengerCount);
+        $suggestedRides = [];
+        foreach ($rides as $ride) {
+            $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
+            $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+            $fee = $this->rideRepository->calculateFee($pickupCoordinates, $destinationCoordinates, $vehicleDetails['type']);
+            if ($ownerDetails) {
+                $ride['owner_details'] = $ownerDetails;
+            }
+            if ($vehicleDetails) {
+                $ride['vehicle_details'] = $vehicleDetails;
+            }
+            if ($fee) {
+                $ride['fee'] = $fee['fee'];
+                $ride['distance'] = $fee['distance'];
+            }
+            $suggestedRides[] = $ride;
+        }
+        return $suggestedRides;
+    }
+
+
 
     public function getDirections($pickup, $destination)
     {
@@ -242,6 +266,11 @@ class RideService
             ];
         }
     }
+
+
+
+
+
 
     private function decodePolyline($polyline)
     {

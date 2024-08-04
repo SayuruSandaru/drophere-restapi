@@ -173,6 +173,31 @@ class RideController
         }
     }
 
+    public function searchRidesByName($request)
+    {
+        $pickup = $request['pickup_name'];
+        $destination = $request['destination_name'];
+        $date = $request['date'];
+        $passenger_count = $request['passenger_count'];
+        $pickupCordinate = ['lat' => $request['pickup_lat'], 'lng' => $request['pickup_lng']];
+        $destinationCoordinate = ['lat' => $request['destination_lat'], 'lng' => $request['destination_lng']];
+        $suggestedRides = $this->rideService->searchRidesByName($pickup, $destination, $date, $passenger_count, $pickupCordinate, $destinationCoordinate);
+
+        if (!empty($suggestedRides)) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => $suggestedRides],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => []],
+                200
+            );
+        }
+    }
+
 
     public function getDirections($request)
     {
