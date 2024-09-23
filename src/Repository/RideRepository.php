@@ -326,24 +326,29 @@ class RideRepository
     public function calculateFee($pickup, $destination, $vehicleType)
     {
         $distance = $this->getRoadDistance($pickup, $destination);
-        $fee = 0;
-        if ($vehicleType == 'bike') {
-            $fee = $distance * 5;
-        } else if ($vehicleType == 'tuktuk') {
-            $fee = $distance * 15;
-        } else if ($vehicleType == 'car') {
-            $fee = $distance * 20;
-        } else if ($vehicleType == 'van') {
-            $fee = $distance * 25;
-        } else {
-            $fee = $distance * 30;
-        }
-        $fee = round($fee);
+        $charge = getFees($vehicleType);
+        $fee = $charge['price_per_km'] * $distance;
         $response = [
             'fee' => $fee,
             'distance' => $distance
         ];
         return $response;
+    }
+
+    public function getFees($type){
+        try{
+            $stmt = $this->DB->prepare("SELECT price_per_km FROM vehicle_type WHERE type = ?");
+            $stmt->bind_param("s", $type);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Vehicle type not found");
+            }
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
     }
 
     public function getDirections($pickup, $destination)
