@@ -215,7 +215,6 @@ class RideService
             if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
                 $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
                 $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
-                echo print_r($vehicleDetails);
                 $fee = $this->rideRepository->calculateFee($pickup, $destination, $vehicleDetails['type']);
                 if ($ownerDetails) {
                     $ride['owner_details'] = $ownerDetails;
