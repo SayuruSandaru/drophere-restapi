@@ -216,7 +216,6 @@ class RideService
                 $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
                 $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
                 $fee = $this->rideRepository->calculateFee($pickup, $destination, $vehicleDetails['type']);
-
                 if ($ownerDetails) {
                     $ride['owner_details'] = $ownerDetails;
                 }
@@ -225,7 +224,8 @@ class RideService
                 }
                 if ($fee) {
                     $ride['fee'] = $fee['fee'];
-                    $ride['distance'] = $fee['distance'];
+                $ride['individualFee'] = ceil($fee['fee'] / $passngerCountr);
+                $ride['distance'] = $fee['distance'];
                 }
                 $suggestedRides[] = $ride;
             }
@@ -250,6 +250,7 @@ class RideService
             }
             if ($fee) {
                 $ride['fee'] = $fee['fee'];
+                $ride['individualFee'] = ceil($fee['fee'] / $passengerCount);
                 $ride['distance'] = $fee['distance'];
             }
             $suggestedRides[] = $ride;
