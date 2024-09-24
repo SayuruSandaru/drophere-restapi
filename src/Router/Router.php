@@ -18,6 +18,11 @@ class Router
         $this->addRoute('GET', $uri, $middlewares, $callback);
     }
 
+    public function put($uri, $middlewares, $callback)
+    {
+        $this->addRoute('PUT', $uri, $middlewares, $callback);
+    }
+
     private function addRoute($method, $uri, $middlewares, $callback)
     {
         $this->routes[$method][$uri] = [

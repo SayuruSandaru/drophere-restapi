@@ -150,26 +150,40 @@ class UserRepository
     public function createDispute($userId, $category, $status, $message)
     {
         try {
+            // Insert into the dispute table
             $stmt = $this->DB->prepare("INSERT INTO dispute (Category, Status, Message) VALUES (?, ?, ?)");
             if ($stmt === false) {
                 throw new Exception("Failed to prepare the SQL statement for dispute: " . $this->DB->error);
             }
             $stmt->bind_param("sss", $category, $status, $message);
             $stmt->execute();
+    
             if ($stmt->affected_rows == 0) {
                 throw new Exception("Error in creating dispute: No rows affected.");
             }
+    
+            // Get the last inserted dispute ID
             $disputeId = $this->DB->insert_id;
+            error_log("Inserted dispute ID: " . $disputeId); // Log for debugging
+    
+            // Insert into the user_dispute table
             $stmt = $this->DB->prepare("INSERT INTO user_dispute (UserId, DisputeId) VALUES (?, ?)");
             if ($stmt === false) {
                 throw new Exception("Failed to prepare the SQL statement for user_dispute: " . $this->DB->error);
             }
             $stmt->bind_param("ii", $userId, $disputeId);
+            
+            // Log the values being inserted for debugging
+            error_log("UserId: " . $userId . " | DisputeId: " . $disputeId);
+    
             $stmt->execute();
+    
             if ($stmt->affected_rows == 0) {
                 throw new Exception("Error in creating user_dispute link: No rows affected.");
             }
+    
             return $disputeId;
+    
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new Exception("Database error: " . $e->getMessage());
@@ -178,7 +192,6 @@ class UserRepository
             throw new Exception("General error: " . $e->getMessage());
         }
     }
-
 
 
     public function getAllDisputes()
