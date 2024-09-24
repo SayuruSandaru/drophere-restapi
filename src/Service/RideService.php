@@ -228,9 +228,9 @@ class RideService
                 $ride['distance'] = $fee['distance'];
                 }
                 $suggestedRides[] = $ride;
+                
             }
         }
-
         return $suggestedRides;
     }
 
