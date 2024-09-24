@@ -348,7 +348,8 @@ class RideRepository
 
     public function calculateFee($pickup, $destination, $vehicleType)
     {
-        $distance = $this->getRoadDistance($pickup, $destination);
+        // $distance = $this->getRoadDistance($pickup, $destination);
+        
         $distance = 300;
         $charge = $this->getFees($vehicleType);
         $fee = $charge['price_per_km'] * $distance;
