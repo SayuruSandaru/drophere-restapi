@@ -100,4 +100,31 @@ class DriverService
             ];
         }
     }
+
+    public function updateDriverStatus($driverId, $status)
+    {
+        try {
+            $result = $this->driverRepository->updateDriverStatus($driverId, $status);
+            if ($result) {
+                return [
+                    'status' => true,
+                    'message' => 'Driver status updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Error updating driver status'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+    
 }

@@ -27,4 +27,6 @@ function registerDeliveryRoutes(Router $router)
     $router->get('/deliveries', [$authMiddleware], function ($request) use ($deliveryController) {
         $deliveryController->getAllDeliveries();
     });
+
+    
 }
