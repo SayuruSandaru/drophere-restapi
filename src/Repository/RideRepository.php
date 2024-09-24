@@ -323,21 +323,15 @@ class RideRepository
         return $earthRadius * $c;
     }
 
-    public function calculateFee($pickup, $destination, $vehicleType)
+    public function getFees($type)
     {
-        $distance = $this->getRoadDistance($pickup, $destination);
-        $charge = getFees($vehicleType);
-        $fee = $charge['price_per_km'] * $distance;
-        $response = [
-            'fee' => $fee,
-            'distance' => $distance
-        ];
-        return $response;
-    }
+        try {
+            $stmt = $this->DB->prepare("SELECT price_per_km FROM vehicle_fees WHERE vehicle_type = ?");
 
-    public function getFees($type){
-        try{
-            $stmt = $this->DB->prepare("SELECT price_per_km FROM vehicle_type WHERE type = ?");
+            if ($stmt === false) {
+                throw new Exception("Failed to prepare SQL statement: " . $this->DB->error);
+            }
+            
             $stmt->bind_param("s", $type);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -350,6 +344,22 @@ class RideRepository
             throw new Exception($e->getMessage());
         }
     }
+    
+
+    public function calculateFee($pickup, $destination, $vehicleType)
+    {
+        $distance = $this->getRoadDistance($pickup, $destination);
+        $distance = 300;
+        $charge = $this->getFees($vehicleType);
+        $fee = $charge['price_per_km'] * $distance;
+        $response = [
+            'fee' => $fee,
+            'distance' => $distance
+        ];
+        return $response;
+    }
+
+
 
     public function getDirections($pickup, $destination)
     {
@@ -407,54 +417,59 @@ class RideRepository
 
 
     private function getRoadDistance($pickup, $destination)
-    {
-        $url = 'https://routes.googleapis.com/directions/v2:computeRoutes?key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac';
-
-        $data = array(
-            "origin" => array(
-                "location" => array(
-                    "latLng" => array(
-                        "latitude" => $pickup['lat'],
-                        "longitude" => $pickup['lng']
-                    )
+{
+    $url = 'https://routes.googleapis.com/directions/v2:computeRoutes?key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac';
+    $data = array(
+        "origin" => array(
+            "location" => array(
+                "latLng" => array(
+                    "latitude" => $pickup['lat'],
+                    "longitude" => $pickup['lng']
                 )
-            ),
-            "destination" => array(
-                "location" => array(
-                    "latLng" => array(
-                        "latitude" => $destination['lat'],
-                        "longitude" => $destination['lng']
-                    )
+            )
+        ),
+        "destination" => array(
+            "location" => array(
+                "latLng" => array(
+                    "latitude" => $destination['lat'],
+                    "longitude" => $destination['lng']
                 )
-            ),
-            "travelMode" => "DRIVE",
-            "computeAlternativeRoutes" => true
-        );
+            )
+        ),
+        "travelMode" => "DRIVE",
+        "computeAlternativeRoutes" => true
+    );
 
-        $options = array(
-            'http' => array(
-                'header'  => "Content-Type: application/json\r\n" .
-                    "X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline\r\n",
-                'method'  => 'POST',
-                'content' => json_encode($data),
-                'follow_location' => true,
-            ),
-        );
+    $options = array(
+        'http' => array(
+            'header'  => "Content-Type: application/json\r\n" .
+                "X-Goog-FieldMask: routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline",
+            'method'  => 'POST',
+            'content' => json_encode($data),
+            'ignore_errors' => true
+        ),
+    );
 
-        $context  = stream_context_create($options);
-        $response = file_get_contents($url, false, $context);
-
-        if ($response === FALSE) {
-            throw new Exception("Error fetching road distance.");
-        }
-
-        $data = json_decode($response, true);
-
-        if (isset($data['routes'][0]['distanceMeters'])) {
-            $distance = $data['routes'][0]['distanceMeters'] / 1000; // Convert meters to kilometers
-            return $distance;
-        } else {
-            throw new Exception("Error fetching road distance: No distance data in response");
-        }
+    $context  = stream_context_create($options);
+    $response = file_get_contents($url, false, $context);
+    echo $response;
+    if ($response === FALSE) {
+        throw new Exception("Error fetching road distance.");
     }
+
+    $data = json_decode($response, true);
+
+    // Log or check if the response contains an error message
+    if (isset($data['error'])) {
+        throw new Exception("Error fetching road distance: " . $data['error']['message']);
+    }
+
+    if (isset($data['routes'][0]['distanceMeters'])) {
+        $distance = $data['routes'][0]['distanceMeters'] / 1000; // Convert meters to kilometers
+        return $distance;
+    } else {
+        throw new Exception("Error fetching road distance: No distance data in response");
+    }
+}
+
 }
