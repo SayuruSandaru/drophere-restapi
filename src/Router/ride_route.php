@@ -67,11 +67,11 @@ function registerRideRoutes(Router $router)
         $rideController->getAllRidesBydriverId($request);
     });
 
-    $router->post('/rides/search', [$authMiddleware], function ($request) use ($rideController) {
+    $router->post('/rides/search', [], function ($request) use ($rideController) {
         $rideController->searchRides($request);
     });
 
-    $router->post('/rides/search/v1', [$authMiddleware, $searchNameValidation], function ($request) use ($rideController) {
+    $router->post('/rides/search/v1', [$searchNameValidation], function ($request) use ($rideController) {
         $rideController->searchRidesByName($request);
     });
 

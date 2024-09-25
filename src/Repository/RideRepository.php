@@ -451,14 +451,12 @@ class RideRepository
 
     $context  = stream_context_create($options);
     $response = file_get_contents($url, false, $context);
-    echo $response;
     if ($response === FALSE) {
         throw new Exception("Error fetching road distance.");
     }
 
     $data = json_decode($response, true);
 
-    // Log or check if the response contains an error message
     if (isset($data['error'])) {
         throw new Exception("Error fetching road distance: " . $data['error']['message']);
     }
