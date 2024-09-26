@@ -60,7 +60,6 @@ class ReservationService
 
             foreach ($reservations as $key => $reservation) {
                 $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
-                echo $reservation['reservation_id'];
                 $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
                 $reservations[$key]['ride'] = $rideDetails;
                 $reservations[$key]['delivery_details'] = $deliveryDetails;
