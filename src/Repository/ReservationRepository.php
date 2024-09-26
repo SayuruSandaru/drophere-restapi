@@ -52,24 +52,30 @@ class ReservationRepository
         }
     }
 
-    public function createDeliveryService($recipientName, $recipientAddress, $recipientPhone, $weight, $signature = null)
+    public function createDeliveryService($recipientName, $recipientAddress, $recipientPhone, $weight, $signature = null, $reservationId)
     {
         try {
-            $stmt = $this->DB->prepare("INSERT INTO delivery_service (recipient_name, recipient_address, recipient_phone, weight, signature) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $this->DB->prepare("INSERT INTO delivery_service (recipient_name, recipient_address, recipient_phone, weight, signature, reservation_id) VALUES (?, ?, ?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new Exception("Failed to prepare statement: " . $this->DB->error);
             }
-            $stmt->bind_param("sssds", $recipientName, $recipientAddress, $recipientPhone, $weight, $signature);
+    
+            $stmt->bind_param("sssdsi", $recipientName, $recipientAddress, $recipientPhone, $weight, $signature, $reservationId);
+            
             $stmt->execute();
+    
             if ($stmt->affected_rows == 0) {
                 throw new Exception("Error in creating delivery service entry");
             }
+            
             return $this->DB->insert_id;
+    
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new Exception("MySQL Error: " . $e->getMessage());
         }
     }
+    
 
     public function getAvailableReservations($status, $user_id)
     {
@@ -108,6 +114,42 @@ class ReservationRepository
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new Exception("Failed to update reservation status: " . $e->getMessage());
+        }
+    }
+
+    public function getDeliveryDetails($reservationId)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM delivery_service WHERE reservation_id = ?");
+            $stmt->bind_param("i", $reservationId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows == 0) {
+                throw new Exception("No delivery service details found");
+            }
+
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Failed to retrieve delivery service details: " . $e->getMessage());
+        }
+    }
+
+    public function updateDeliverySignature($reservationId, $signature)
+    {
+        try {
+            $stmt = $this->DB->prepare("UPDATE delivery_service SET signature = ? WHERE reservation_id = ?");
+            $stmt->bind_param("si", $signature, $reservationId);
+            $stmt->execute();
+
+            if ($stmt->affected_rows == 0) {
+                throw new Exception("No delivery service details found or signature unchanged");
+            }
+            return true;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Failed to update delivery signature: " . $e->getMessage());
         }
     }
 }

@@ -40,7 +40,7 @@ class DeliveryRepository
     public function getDeliveryById($deliveryId)
     {
         try {
-            $stmt = $this->DB->prepare("SELECT * FROM deliveries WHERE delivery_id = ?");
+            $stmt = $this->DB->prepare("SELECT * FROM    WHERE delivery_id = ?");
             
             if (!$stmt) {
                 throw new Exception("Prepare statement failed: " . $this->DB->error);
