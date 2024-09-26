@@ -37,6 +37,27 @@ class AuthRepository
         }
     }
 
+    public function adminLogin($email, $password){
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM admin WHERE username = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Admin not found");
+            }
+            $admin = $result->fetch_assoc();
+            if ($password == $admin['password']) {
+                return $admin;
+            } else {
+                throw new Exception("Invalid password");
+            }
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Error in logging in admin");
+        }
+    }
+
 
     public function register($email, $password, $firstname, $lastname, $username, $phone, $profile_image)
     {

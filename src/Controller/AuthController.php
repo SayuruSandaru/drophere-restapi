@@ -84,7 +84,7 @@ class AuthController
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_ERROR,
                 [
-                    "message" => $user['message']
+                    "message" => isset($user['message']) ? $user['message'] : 'An error occurred'
                 ],
                 400
             );
@@ -120,6 +120,43 @@ class AuthController
                     ResponseUtility::STATUS_ERROR,
                     [
                         "message" => $user['message']
+                    ],
+                    400
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                [
+                    "message" => $e->getMessage()
+                ],
+                400
+            );
+        }
+    }
+
+    public function adminLogin($data)
+    {
+        try {
+            $email = $data['email'];
+            $password = $data['password'];
+            $admin = $this->authenticationService->adminLogin($email, $password);
+            if ($admin['status']) {
+                $token = $this->authenticationService->generateToken($admin['admin']);
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    [
+                        "message" => "Admin logged in successfully",
+                        "token" => $token,
+                    ],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    [
+                        "message" => $admin['message']
                     ],
                     400
                 );
