@@ -102,13 +102,13 @@ class DriverRepository
     public function updateDriverStatus($driverId, $status)
     {
         try {
-            // Check if status is valid
+            
             if (!in_array($status, ['pending', 'accepted', 'rejected', 'suspended'])) {
                 throw new Exception("Invalid status value");
             }
     
             $stmt = $this->DB->prepare("UPDATE drivers SET status = ? WHERE driver_id = ?");
-            
+
             $stmt->bind_param("si", $status, $driverId);
             $stmt->execute();
     
