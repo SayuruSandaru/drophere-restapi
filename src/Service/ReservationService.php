@@ -60,9 +60,11 @@ class ReservationService
 
             foreach ($reservations as $key => $reservation) {
                 $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
-                $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
+                if ($reservation['type'] == 'delivery') {
+                    $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
+                    $reservation['delivery_details'] = $deliveryDetails;
+                }
                 $reservations[$key]['ride'] = $rideDetails;
-                $reservations[$key]['delivery_details'] = $deliveryDetails;
             }
 
             return [
@@ -77,6 +79,7 @@ class ReservationService
             ];
         }
     }
+
 
     public function updateReservationStatus($reservationId, $newStatus)
     {
@@ -102,12 +105,42 @@ class ReservationService
         }
     }
 
+    public function getReservationById($reservationId)
+    {
+        try {
+            $reservation = $this->reservationRepository->getReservationById($reservationId);
+            if ($reservation) {
+                $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
+                if ($reservation['type'] == 'delivery') {
+                    $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
+                    $reservation['delivery_details'] = $deliveryDetails;
+                }
+                $reservation['ride'] = $rideDetails;
+                return [
+                    'status' => true,
+                    'data' => $reservation
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'No reservation found'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to retrieve reservation: ' . $e->getMessage()
+            ];
+        }
+    }
+
 
 
     public function createDeliveryReservation($userId, $driverId, $rideId, $status, $price, $recipientName, $recipientAddress, $recipientPhone, $weight, $type)
     {
         try {
-            $res = $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type);  
+            $res = $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type);
             if ($res > 0) {
                 $res2 = $this->reservationRepository->createDeliveryService($recipientName, $recipientAddress, $recipientPhone, $weight, null, $res);
                 if ($res2 > 0) {

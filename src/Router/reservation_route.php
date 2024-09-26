@@ -40,6 +40,11 @@ function registerReservationRoutes(Router $router)
         $reservationController->updateReservationStatus($reservationId, $newStatus);
     });
 
+    $router->get('/reservation/{id}', [$authMiddleware], function ($request, $id) use ($reservationController) {
+        $request['reservationId'] = $id;
+        $reservationController->getReservationById($id);
+    });
+
     $deliveryReservationValidation = new InputValidationMiddleware([
         'driver_id' => 'required',
         'ride_id' => 'required',
