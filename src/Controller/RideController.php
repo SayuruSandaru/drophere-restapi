@@ -107,7 +107,6 @@ class RideController
     public function getRideByStatus($request)
     {
         $status = $request['status'];
-
         $res = $this->rideService->getRideByStatus($status);
 
         if ($res['status']) {

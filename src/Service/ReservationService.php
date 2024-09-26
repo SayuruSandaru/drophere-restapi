@@ -60,7 +60,10 @@ class ReservationService
 
             foreach ($reservations as $key => $reservation) {
                 $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
+                echo $reservation['reservation_id'];
+                $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
                 $reservations[$key]['ride'] = $rideDetails;
+                $reservations[$key]['delivery_details'] = $deliveryDetails;
             }
 
             return [
@@ -105,9 +108,9 @@ class ReservationService
     public function createDeliveryReservation($userId, $driverId, $rideId, $status, $price, $recipientName, $recipientAddress, $recipientPhone, $weight, $type)
     {
         try {
-            $res = $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type);
+            $res = $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type);  
             if ($res > 0) {
-                $res2 = $this->reservationRepository->createDeliveryService($recipientName, $recipientAddress, $recipientPhone, $weight);
+                $res2 = $this->reservationRepository->createDeliveryService($recipientName, $recipientAddress, $recipientPhone, $weight, null, $res);
                 if ($res2 > 0) {
                     return [
                         'status' => true,
