@@ -136,6 +136,25 @@ class ReservationRepository
         }
     }
 
+    public function getReservationByID($reservationId)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM reservation WHERE reservation_id = ?");
+            $stmt->bind_param("i", $reservationId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows == 0) {
+                throw new Exception("No reservation found");
+            }
+
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Failed to retrieve reservation details: " . $e->getMessage());
+        }
+    }
+
     public function updateDeliverySignature($reservationId, $signature)
     {
         try {

@@ -77,6 +77,33 @@ class ReservationController
         }
     }
 
+    public function getReservationById($reservationId)
+    {
+        try {
+            $result = $this->reservationService->getReservationById($reservationId);
+            if ($result['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    ['data' => $result['data']],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    ['message' => $result['message']],
+                    200
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => 'Failed to retrieve reservation: ' . $e->getMessage()],
+                200
+            );
+        }
+    }
+
 
     public function updateReservationStatus($reservationId, $newStatus)
     {
