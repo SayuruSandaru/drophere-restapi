@@ -104,6 +104,33 @@ class ReservationController
         }
     }
 
+    public function updateDeliverySignature($reservationId, $url)
+    {
+        try {
+            $result = $this->reservationService->updateDeliverySignature($reservationId, $url);
+            if ($result['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    ['message' => "Delivery signature updated successfully"],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    ['message' => $result['message']],
+                    200
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => 'Failed to update delivery signature: ' . $e->getMessage()],
+                200
+            );
+        }
+    }
+
 
     public function updateReservationStatus($reservationId, $newStatus)
     {

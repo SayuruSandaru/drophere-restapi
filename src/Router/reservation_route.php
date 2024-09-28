@@ -60,4 +60,10 @@ function registerReservationRoutes(Router $router)
         $type = "delivery";
         $reservationController->createDeliveryReservation($request, $type);
     });
+
+    $router->post('/reservation/update/delivery/signature', [$authMiddleware], function ($request) use ($reservationController) {
+        $reservationId = $request['reservation_id'];
+        $signature = $request['url'];
+        $reservationController->updateDeliverySignature($reservationId, $signature);
+    });
 }
