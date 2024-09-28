@@ -80,6 +80,29 @@ class ReservationService
         }
     }
 
+    public function updateDeliverySignature($reservationId, $url){
+        try {
+            $res = $this->reservationRepository->updateDeliverySignature($reservationId, $url);
+            if ($res) {
+                return [
+                    'status' => true,
+                    'message' => 'Delivery signature updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Failed to update delivery signature'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to update delivery signature: ' . $e->getMessage()
+            ];
+        }
+    }
+
 
     public function updateReservationStatus($reservationId, $newStatus)
     {
