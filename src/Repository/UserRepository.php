@@ -100,17 +100,39 @@ class UserRepository
     public function addReview($description, $rating, $driver_id, $user_id)
     {
         try {
+            if ($driver_id == $user_id) {
+                throw new \Exception("You cannot review yourself.");
+            }
+    
+            $checkStmt = $this->DB->prepare("SELECT COUNT(*) FROM reviews WHERE driver_id = ? AND user_id = ?");
+            if ($checkStmt === false) {
+                throw new \Exception("Failed to prepare statement: " . $this->DB->error);
+            }
+            $checkStmt->bind_param("ii", $driver_id, $user_id);
+            $checkStmt->execute();
+            $checkStmt->bind_result($count);
+            $checkStmt->fetch();
+            $checkStmt->close();
+    
+            if ($count > 0) {
+                throw new \Exception("You have already reviewed this driver.");
+            }
+    
             $stmt = $this->DB->prepare("INSERT INTO reviews (description, rating, driver_id, user_id) VALUES (?, ?, ?, ?)");
             if ($stmt === false) {
                 throw new \Exception("Failed to prepare statement: " . $this->DB->error);
             }
+    
             $stmt->bind_param("siii", $description, $rating, $driver_id, $user_id);
             $stmt->execute();
+    
             if ($stmt->affected_rows == 0) {
                 throw new \Exception("Error in adding review");
             }
+    
             $review_Id = $this->DB->insert_id;
             return $review_Id;
+    
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new \Exception($e->getMessage());
@@ -119,6 +141,7 @@ class UserRepository
             throw new \Exception($e->getMessage());
         }
     }
+    
 
     public function getReviewsByDriverId($driver_id)
     {
