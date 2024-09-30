@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Service\UserService;
 use App\Utility\ResponseUtility;
-
+use Exception;
 class UserController
 {
     private $userService;
@@ -169,6 +169,27 @@ class UserController
         }
     }
 
+    // Delete user by ID
+    public function deleteUser($id)
+    {
+        $res = $this->userService->deleteUser($id);
+    
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => 'User deleted successfully'],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                $res['message'] === 'User not found' ? 404 : 500
+            );
+        }
+    }
+
+
 
     public function getDisputeById($dispute_id)
     {
@@ -252,4 +273,26 @@ class UserController
             );
         }
     }
+
+
+    public function updateUserStatus($request)
+{
+    $user_id = $request['user_id'];
+    $status = $request['status'];
+
+    $res = $this->userService->updateUserStatus($user_id, $status);
+    if ($res['status']) {
+        ResponseUtility::sendJsonResponse(
+            ResponseUtility::STATUS_SUCCESS,
+            ['message' => "User status updated successfully"],
+            200
+        );
+    } else {
+        ResponseUtility::sendJsonResponse(
+            ResponseUtility::STATUS_ERROR,
+            ['message' => $res['message']],
+            500
+        );
+    }
+}
 }

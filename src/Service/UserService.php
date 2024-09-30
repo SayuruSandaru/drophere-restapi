@@ -160,6 +160,25 @@ class UserService
     }
 
 
+    public function deleteUser($id)
+    {
+        try {
+            // Call the correct method from UserRepository
+            $result = $this->userRepository->deleteUser($id); // Changed here
+            return [
+                'status' => true,
+                'message' => 'User deleted successfully'
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
     public function createDispute($status, $category, $message, $userId)
     {
         try {
@@ -234,4 +253,21 @@ class UserService
             ];
         }
     }
+
+    public function updateUserStatus($user_id, $status)
+{
+    try {
+        $result = $this->userRepository->updateUserStatus($user_id, $status);
+        return [
+            'status' => true,
+            'message' => 'User status updated successfully'
+        ];
+    } catch (\Exception $e) {
+        error_log($e->getMessage());
+        return [
+            'status' => false,
+            'message' => $e->getMessage()
+        ];
+    }
+}
 }
