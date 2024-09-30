@@ -23,6 +23,12 @@ class Router
         $this->addRoute('PUT', $uri, $middlewares, $callback);
     }
 
+    public function delete($uri, $middlewares, $callback)
+    {
+        $this->addRoute('DELETE', $uri, $middlewares, $callback);
+    }
+
+
     private function addRoute($method, $uri, $middlewares, $callback)
     {
         $this->routes[$method][$uri] = [

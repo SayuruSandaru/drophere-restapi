@@ -65,6 +65,28 @@ class UserRepository
         }
     }
 
+
+    public function deleteUser($id)
+{
+    try {
+        $stmt = $this->DB->prepare("DELETE FROM users WHERE id = ?");
+        if ($stmt === false) {
+            throw new Exception("Failed to prepare the SQL statement: " . $this->DB->error);
+        }
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        if ($stmt->affected_rows == 0) {
+            throw new Exception("No user found with the provided ID");
+        }
+
+    } catch (\mysqli_sql_exception $e) {
+        error_log($e->getMessage());
+        throw new Exception("Database error: " . $e->getMessage());
+    }
+}
+
+
     private function isDriver($userId)
     {
         try {
@@ -290,4 +312,30 @@ class UserRepository
             throw new Exception("General error: " . $e->getMessage());
         }
     }
+
+
+    public function updateUserStatus($userId, $status)
+{
+    try {
+        $stmt = $this->DB->prepare("UPDATE users SET status = ? WHERE id = ?");
+        if ($stmt === false) {
+            throw new Exception("Failed to prepare the SQL statement: " . $this->DB->error);
+        }
+
+        $stmt->bind_param("si", $status, $userId);
+        $stmt->execute();
+
+        if ($stmt->affected_rows == 0) {
+            throw new Exception("Error in updating status: No rows affected.");
+        }
+
+        return true;
+    } catch (\mysqli_sql_exception $e) {
+        error_log($e->getMessage());
+        throw new Exception("Database error: " . $e->getMessage());
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        throw new Exception("General error: " . $e->getMessage());
+    }
+}
 }
