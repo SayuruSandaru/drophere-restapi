@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/src/Router/Router.php';
 require_once __DIR__ . '/src/Controller/AuthController.php';
 require_once __DIR__ . '/src/Service/AuthService.php';
@@ -19,6 +20,7 @@ require_once __DIR__ . '/src/Service/AuthService.php';
 require_once __DIR__ . '/src/Middleware/AuthMiddleware.php';
 require_once __DIR__ . '/src/Repository/DriverRepository.php';
 require_once __DIR__ . '/src/Repository/UserRepository.php';
+require_once __DIR__ . '/src/Repository/EmailRepository.php';
 require_once __DIR__ . '/src/Service/DriverService.php';
 require_once __DIR__ . '/src/Controller/DriverController.php';
 require_once __DIR__ . '/src/Middleware/FileUploadValidationMiddleware.php';

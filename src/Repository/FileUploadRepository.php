@@ -6,9 +6,9 @@ namespace App\Repository;
 
 class FileUploadRepository
 {
-    private $cloudName = "dckifek20";
-    private $apiKey = "893773612382249";
-    private $apiSecret = "4nqFZSc2EDbtNZfFTxI-Sq5OGeo";
+    private $cloudName = "CHANGE_ME";
+private $apiKey = "CHANGE_ME";
+private $apiSecret = "CHANGE_ME";
 
     public function uploadFile($file)
     {

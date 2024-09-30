@@ -27,6 +27,10 @@ function registerAuthRoutes(Router $router)
         'email' => 'email',
     ]);
 
+    $forgotPassword = new InputValidationMiddleware([
+        'email' => 'email',
+    ]);
+
     // Attach middleware to login route
     $router->post('/login', [$loginValidation], function () use ($authController) {
         $data = json_decode(file_get_contents('php://input'), true);
@@ -51,5 +55,13 @@ function registerAuthRoutes(Router $router)
     $router->post('/admin/login', [$loginValidation], function () use ($authController) {
         $data = json_decode(file_get_contents('php://input'), true);
         $response = $authController->adminLogin($data);
+    });
+
+    $router->post('/forgot-password', [$forgotPassword], function ($request) use ($authController) {
+        $authController->forgotPassword($request['email']);
+    });
+
+    $router->post('/reset-password', [$forgotPassword], function ($request) use ($authController) {
+        $authController->resetPassword($request['token'], $request['password']);
     });
 }
