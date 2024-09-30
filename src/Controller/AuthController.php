@@ -181,6 +181,7 @@ class AuthController
                     ResponseUtility::STATUS_SUCCESS,
                     [
                         "message" => "Password reset link sent successfully",
+                        "token" => $user['token']
                     ],
                     200
                 );

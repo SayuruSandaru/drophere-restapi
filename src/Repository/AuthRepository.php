@@ -155,7 +155,7 @@ class AuthRepository
 
             $this->emailRepo->sendEmail($email, $subject, $body, $altBody);
 
-            return true;    
+            return $token;    
 
         } catch (PHPMailerException $e) {
             error_log($e->getMessage());

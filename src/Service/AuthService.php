@@ -213,7 +213,7 @@ class AuthService
             if ($user !== NULL) {
                 return [
                     "status" => true,
-                    "user" => $user
+                    "token" => $user
                 ];
             } else {
                 return [
