@@ -22,12 +22,12 @@ class AuthService
         $issuedAt = time();
         $expirationTime = $issuedAt + 3600 * 24 * 30; // Token valid for 30 days
         $payload = array(
-            'userid' => $user['id'],
-            'email' => $user['email'],
-            'firstname' => $user['firstname'],
-            'lastname' => $user['lastname'],
-            'username' => $user['username'],
-            'phone' => $user['phone'],
+            'userid' => $user['id'] ?? null,
+            'email' => $user['email'] ?? null,
+            'firstname' => $user['firstname'] ?? null,
+            'lastname' => $user['lastname'] ?? null,
+            'username' => $user['username'] ?? null,
+            'phone' => $user['phone'] ?? null,
             'iat' => $issuedAt,
             'exp' => $expirationTime
         );
@@ -76,6 +76,30 @@ class AuthService
                 return [
                     "status" => true,
                     "user" => $user
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Invalid username or password"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
+    public function adminLogin($username, $password)
+    {
+        try {
+            $admin = $this->authenticationRepository->adminLogin($username, $password);
+            if ($admin !== NULL) {
+                return [
+                    "status" => true,
+                    "admin" => $admin
                 ];
             } else {
                 return [

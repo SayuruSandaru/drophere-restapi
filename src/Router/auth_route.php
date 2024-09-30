@@ -52,6 +52,11 @@ function registerAuthRoutes(Router $router)
         $response = $authController->updateUser($data);
     });
 
+    $router->post('/admin/login', [$loginValidation], function () use ($authController) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $response = $authController->adminLogin($data);
+    });
+
     $router->post('/forgot-password', [$forgotPassword], function ($request) use ($authController) {
         $authController->forgotPassword($request['email']);
     });

@@ -37,3 +37,6 @@ function registerDriverRoutes(Router $router)
         $driverController->updateDriverStatus($request);
     });
 }
+
+
+
