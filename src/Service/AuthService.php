@@ -182,4 +182,52 @@ class AuthService
             ];
         }
     }
+
+    public function forgotPassword($email){
+        try {
+            $user = $this->authenticationRepository->forgotPassword($email);
+            if ($user !== NULL) {
+                return [
+                    "status" => true,
+                    "user" => $user
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Error in updating user"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
+    public function resetPassword($password, $token)
+    {
+        try {
+            $user = $this->authenticationRepository->resetPassword($$token, $password);
+            if ($user !== NULL) {
+                return [
+                    "status" => true,
+                    "user" => $user
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Error in updating user"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
 }

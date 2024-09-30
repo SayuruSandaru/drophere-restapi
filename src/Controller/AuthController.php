@@ -84,7 +84,7 @@ class AuthController
             ResponseUtility::sendJsonResponse(
                 ResponseUtility::STATUS_ERROR,
                 [
-                    "message" => $user['message']
+                    "message" => $e->getMessage()
                 ],
                 400
             );
@@ -112,6 +112,71 @@ class AuthController
                     ResponseUtility::STATUS_SUCCESS,
                     [
                         "message" => "User updated successfully",
+                    ],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    [
+                        "message" => $user['message']
+                    ],
+                    400
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                [
+                    "message" => $e->getMessage()
+                ],
+                400
+            );
+        }
+    }
+
+    public function forgotPassword($email){
+        try {
+            $user = $this->authenticationService->forgotPassword($email);
+            if ($user['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    [
+                        "message" => "Password reset link sent successfully",
+                    ],
+                    200
+                );
+            } else {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_ERROR,
+                    [
+                        "message" => $user['message']
+                    ],
+                    400
+                );
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                [
+                    "message" => $e->getMessage()
+                ],
+                400
+            );
+        }
+    }
+
+    public function resetPassword($token, $newPassword)
+    {
+        try {
+            $user = $this->authenticationService->resetPassword($token, $newPassword);
+            if ($user['status']) {
+                ResponseUtility::sendJsonResponse(
+                    ResponseUtility::STATUS_SUCCESS,
+                    [
+                        "message" => "Password reset successfully",
                     ],
                     200
                 );
