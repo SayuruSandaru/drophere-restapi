@@ -54,6 +54,16 @@ function registerUserRouter(Router $router)
         $userController->getUserDetails($id);
     });
 
+    $router->delete('/users/delete/{id}', [$authMiddleware], function ($request, $id) use ($userController) {
+        $userController->deleteUser($id);
+    });
+
+    $router->post('/user/status', [$authMiddleware], function ($request) use ($userController) {
+        $userController->updateUserStatus($request);
+    });
+    
+
+
     // Instantiate the necessary controller and middleware
     $userController = new UserController();
     $authMiddleware = new AuthMiddleware();
