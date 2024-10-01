@@ -233,7 +233,7 @@ class AuthService
     public function resetPassword($password, $token)
     {
         try {
-            $user = $this->authenticationRepository->resetPassword($$token, $password);
+            $user = $this->authenticationRepository->resetPassword($token, $password);
             if ($user !== NULL) {
                 return [
                     "status" => true,

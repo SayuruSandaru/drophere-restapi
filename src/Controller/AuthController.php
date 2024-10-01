@@ -209,7 +209,7 @@ class AuthController
     public function resetPassword($token, $newPassword)
     {
         try {
-            $user = $this->authenticationService->resetPassword($token, $newPassword);
+            $user = $this->authenticationService->resetPassword($newPassword, $token);
             if ($user['status']) {
                 ResponseUtility::sendJsonResponse(
                     ResponseUtility::STATUS_SUCCESS,
