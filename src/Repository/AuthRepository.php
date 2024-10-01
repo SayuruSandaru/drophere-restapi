@@ -148,7 +148,7 @@ class AuthRepository
                 throw new Exception("Failed to generate password reset token");
             }
 
-            $resetLink = "https://yourfrontenddomain.com/reset-password.php?token=" . $token;
+            $resetLink = "https://drophere-staging.web.app/reset-password.php?token=" . $token;
             $subject = "Password Reset Request";
             $body = "Click the link below to reset your password:<br><a href='$resetLink'>Reset Password</a>";
             $altBody = "Click the link to reset your password: $resetLink";
