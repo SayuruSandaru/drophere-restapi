@@ -102,4 +102,45 @@ class VehicleController
             );
         }
     }
+
+    public function getVehicleFeeDetails()
+    {
+        $res = $this->vehicleService->getVehicleFeeDetails();
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['fees' => $res['fees']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                500
+            );
+        }
+    }
+
+    public function updateVehicleFee($request)
+    {
+        $vehicle_type = $request['vehicle_type'];
+        $price_per_km = $request['price_per_km'];
+
+        $res = $this->vehicleService->updateVehicleFee($vehicle_type, $price_per_km);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => $res['message']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                400
+            );
+        }
+    }
 }
