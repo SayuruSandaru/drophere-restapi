@@ -35,4 +35,12 @@ function registerVehicleRoutes(Router $router)
     $router->get('/vehicles/owner/{ownerId}', [$authMiddleware], function ($request, $ownerId) use ($vehicleController) {
         $vehicleController->getVehiclesByOwnerId(['owner_id' => $ownerId]);
     });
+
+    $router->get('/vehicle-fees', [$authMiddleware], function ($request) use ($vehicleController) {
+        $vehicleController->getVehicleFeeDetails();
+    });
+
+    $router->post('/vehicle-fee/update', [$authMiddleware], function ($request) use ($vehicleController) {
+        $vehicleController->updateVehicleFee($request);
+    });
 }
