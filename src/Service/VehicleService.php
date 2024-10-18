@@ -88,4 +88,45 @@ class VehicleService
             ];
         }
     }
+
+    public function getVehicleFeeDetails()
+    {
+        try {
+            $fees = $this->vehicleRepository->getVehicleFeeDetails();
+            return [
+                'status' => true,
+                'fees' => $fees
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateVehicleFee($vehicle_type, $price_per_km)
+    {
+        try {
+            $updated = $this->vehicleRepository->updateVehicleFee($vehicle_type, $price_per_km);
+            if ($updated) {
+                return [
+                    'status' => true,
+                    'message' => 'Price updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Failed to update price'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }
