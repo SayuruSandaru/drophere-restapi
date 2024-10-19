@@ -183,8 +183,11 @@ class ReservationRepository
             if ($result->num_rows == 0) {
                 throw new Exception("No reservation found");
             }
-
-            return $result->fetch_assoc();
+            $reservations = [];
+            while ($row = $result->fetch_assoc()) {
+                $reservations[] = $row;
+            }
+            return $reservations;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw new Exception("Failed to retrieve reservation details: " . $e->getMessage());
