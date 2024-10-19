@@ -66,4 +66,10 @@ function registerReservationRoutes(Router $router)
         $signature = $request['url'];
         $reservationController->updateDeliverySignature($reservationId, $signature);
     });
+
+
+    $router->get('/reservation/ride/{id}', [$authMiddleware], function ($request, $id) use ($reservationController) {
+        $request['reservationId'] = $id;
+        $reservationController->getReservationByRideId($id);
+    });
 }

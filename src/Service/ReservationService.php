@@ -191,4 +191,44 @@ class ReservationService
             ];
         }
     }
+
+    public function getReservationByRideId($rideId)
+    {
+        try {
+            $reservations = $this->reservationRepository->getReservationByRideId($rideId);
+            if (count($reservations) == 0) {
+                return [
+                    'status' => false,
+                    'message' => 'No reservations found for this ride'
+                ];
+            }
+
+            foreach ($reservations as $key => $reservation) {
+                if (is_array($reservation) && isset($reservation['ride_id'])) {
+                    $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
+                    
+                    if ($reservation['type'] == 'delivery') {
+                        $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
+                        $reservation['delivery_details'] = $deliveryDetails;
+                    }
+            
+                    $reservations[$key]['ride'] = $rideDetails;
+                } else {
+                    error_log('Invalid reservation structure: ' . print_r($reservation, true));
+                }
+            }
+            
+
+            return [
+                'status' => true,
+                'data' => $reservations
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to retrieve reservations: ' . $e->getMessage()
+            ];
+        }
+    }
 }

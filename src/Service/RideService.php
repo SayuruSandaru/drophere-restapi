@@ -205,7 +205,6 @@ class RideService
 
     public function searchRides($pickup, $destination, $date, $passngerCountr)
     {
-
         $rides = $this->rideRepository->getAllRides();
         $suggestedRides = [];
 
@@ -286,10 +285,6 @@ class RideService
     }
 
 
-
-
-
-
     private function decodePolyline($polyline)
     {
         $points = [];
@@ -326,7 +321,7 @@ class RideService
         return $points;
     }
 
-    private function isPointOnRoute($point, $routePoints, $tolerance = 100) // tolerance in meters
+    private function isPointOnRoute($point, $routePoints, $tolerance = 100) 
     {
         foreach ($routePoints as $routePoint) {
             if ($this->haversineDistance($point, $routePoint) < $tolerance) {

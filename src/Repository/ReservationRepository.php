@@ -171,4 +171,23 @@ class ReservationRepository
             throw new Exception("Failed to update delivery signature: " . $e->getMessage());
         }
     }
+
+    public function getReservationByRideId($rideId)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM reservation WHERE ride_id = ?");
+            $stmt->bind_param("i", $rideId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows == 0) {
+                throw new Exception("No reservation found");
+            }
+
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Failed to retrieve reservation details: " . $e->getMessage());
+        }
+    }
 }
