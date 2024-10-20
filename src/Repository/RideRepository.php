@@ -150,6 +150,29 @@ class RideRepository
         }
     }
 
+    public function updateBookedSeats($ride_id, $booked_seat)
+    {
+        try {
+            $stmt = $this->DB->prepare("UPDATE ride SET booked_seat = ? WHERE ride_id = ?");
+            
+            $stmt->bind_param("ii", $booked_seat, $ride_id);
+            $stmt->execute(); 
+            
+            if ($stmt->affected_rows == 0) {
+                throw new Exception("Error updating booked seats: No rows affected.");
+            }
+            
+            return true;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+    
+
 
     public function searchByName($pickup, $destination, $date, $passengerCount)
     {

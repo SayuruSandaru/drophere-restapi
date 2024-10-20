@@ -21,15 +21,23 @@ class ReservationService
             $res =  $this->reservationRepository->createReservationPassenger($userId, $driverId, $rideId, $status, $price, $type);
             if ($res > 0) {
                 $res2 = $this->reservationRepository->createPassengerService($passengerCount, $res);
-                if ($res2 > 0) {
-                    return [
-                        'status' => true,
-                        'message' => 'Reservation created successfully'
-                    ];
-                } else {
+                $up = $this->riderepository->updateBookedSeats($rideId, $passengerCount);
+                if($up == 1){
+                    if ($res2 > 0) {
+                        return [
+                            'status' => true,
+                            'message' => 'Reservation created successfully'
+                        ];
+                    } else {
+                        return [
+                            'status' => false,
+                            'message' => 'Error in creating passenger service entry'
+                        ];
+                    }
+                }else{
                     return [
                         'status' => false,
-                        'message' => 'Error in creating passenger service entry'
+                        'message' => 'Error in updating booked seats'
                     ];
                 }
             } else {
