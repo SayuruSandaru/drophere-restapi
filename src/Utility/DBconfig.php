@@ -1,8 +1,8 @@
 <?php
 
-define('DB_HOST', 'db-mysql-nyc3-59693-do-user-14434449-0.h.db.ondigitalocean.com');
+define('DB_HOST', 'drophere-live-db-do-user-14434449-0.m.db.ondigitalocean.com');
 define('DB_USER', 'doadmin');
-define('DB_PASSWORD', 'AVNS__t4S4Zc_r5NESLIxbYW');
+define('DB_PASSWORD', 'AVNS_iu2ue8oQYLh7Vuldwb_');
 define('DB_NAME', 'defaultdb');
 define('DB_PORT', 25060);
 
