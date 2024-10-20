@@ -193,4 +193,23 @@ class ReservationRepository
             throw new Exception("Failed to retrieve reservation details: " . $e->getMessage());
         }
     }
+
+    public function getPassangerService($reservationId)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM passenger_service WHERE reservation_id = ?");
+            $stmt->bind_param("i", $reservationId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows == 0) {
+                throw new Exception("No passenger service details found");
+            }
+
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception("Failed to retrieve passenger service details: " . $e->getMessage());
+        }
+    }
 }

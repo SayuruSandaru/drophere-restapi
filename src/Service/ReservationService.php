@@ -59,11 +59,22 @@ class ReservationService
             }
 
             foreach ($reservations as $key => $reservation) {
+                // Fetch ride details
                 $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
+            
+                // Conditional check for delivery or passenger type
                 if ($reservation['type'] == 'delivery') {
                     $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
-                    $reservation['delivery_details'] = $deliveryDetails;
+                    error_log('Delivery details for reservation ' . $reservation['reservation_id'] . ': ' . print_r($deliveryDetails, true));
+                    $reservations[$key]['delivery_details'] = $deliveryDetails;
+                } else {
+                    $passengerDetails = $this->reservationRepository->getPassangerService($reservation['reservation_id']);
+                    error_log('Passenger details for reservation ' . $reservation['reservation_id'] . ': ' . print_r($passengerDetails, true));
+                    $reservations[$key]['delivery_details'] = null;
+                    $reservations[$key]['passenger_details'] = $passengerDetails;
                 }
+            
+                // Attach ride details
                 $reservations[$key]['ride'] = $rideDetails;
             }
 

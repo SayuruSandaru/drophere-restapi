@@ -73,10 +73,23 @@ class AuthService
         try {
             $user = $this->authenticationRepository->login($username, $password);
             if ($user !== NULL) {
-                return [
-                    "status" => true,
-                    "user" => $user
-                ];
+                if($user['status'] == "Deleted"){
+                    return [
+                        "status" => false,
+                        "message" => "Your account has been deleted"
+                    ];
+                }else if($user['status'] == "Suspended"){
+                    return [
+                        "status" => false,
+                        "message" => "Your account is suspended"
+                    ];
+                }else{
+                    return [
+                        "status" => true,
+                        "user" => $user
+                    ];
+                }
+                
             } else {
                 return [
                     "status" => false,
