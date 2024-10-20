@@ -80,6 +80,40 @@ class ReservationService
         }
     }
 
+    public function getAvailableReservationsDriverId($status, $driverId)
+{
+    try {
+        $reservations = $this->reservationRepository->getAvailableReservationsDriverId($status, $driverId);
+        if (count($reservations) == 0) {
+            return [
+                'status' => false,
+                'message' => 'No available reservations found'
+            ];
+        }
+
+        foreach ($reservations as $key => $reservation) {
+            $rideDetails = $this->riderepository->getRideById($reservation['ride_id']);
+            if ($reservation['type'] == 'delivery') {
+                $deliveryDetails = $this->reservationRepository->getDeliveryDetails($reservation['reservation_id']);
+                $reservation['delivery_details'] = $deliveryDetails;
+            }
+            $reservations[$key]['ride'] = $rideDetails;
+        }
+
+        return [
+            'status' => true,
+            'data' => $reservations
+        ];
+    } catch (\Exception $e) {
+        error_log($e->getMessage());
+        return [
+            'status' => false,
+            'message' => 'Failed to retrieve available reservations: ' . $e->getMessage()
+        ];
+    }
+}
+
+
     public function updateDeliverySignature($reservationId, $url){
         try {
             $res = $this->reservationRepository->updateDeliverySignature($reservationId, $url);

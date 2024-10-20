@@ -98,6 +98,28 @@ class ReservationRepository
         }
     }
 
+    public function getAvailableReservationsDriverId($status, $driver_id)
+{
+    try {
+        $stmt = $this->DB->prepare("SELECT * FROM reservation
+                                    WHERE reservation.status = ? AND reservation.driver_id = ?");
+        $stmt->bind_param("si", $status, $driver_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $reservations = [];
+        while ($row = $result->fetch_assoc()) {
+            $reservations[] = $row;
+        }
+
+        return $reservations;
+    } catch (\mysqli_sql_exception $e) {
+        error_log($e->getMessage());
+        throw new Exception("Failed to retrieve available reservations with driver details: " . $e->getMessage());
+    }
+}
+
+
 
 
     public function updateReservationStatus($reservationId, $newStatus)
