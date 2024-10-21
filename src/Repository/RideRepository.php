@@ -374,10 +374,12 @@ class RideRepository
         $distance = $this->getRoadDistance($pickup, $destination);
         $charge = $this->getFees($vehicleType);
         $fee = $charge['price_per_km'] * $distance;
+        $round = ceil($fee);
         $response = [
-            'fee' => $fee,
+            'fee' => $round,
             'distance' => $distance
         ];
+        
         return $response;
     }
 
