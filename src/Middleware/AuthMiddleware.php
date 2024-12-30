@@ -18,15 +18,24 @@ class AuthMiddleware extends MiddlewareBase
     public function handle($request, $next)
     {
         $headers = getallheaders();
-        if (!isset($headers['Authorization'])) {
+        $token = null;
+
+        // Case insensitive header check
+        foreach ($headers as $header => $value) {
+            if (strtolower($header) === 'authorization') {
+                $token = $value;
+                break;
+            }
+        }
+
+        if ($token === null) {
             http_response_code(401);
             ResponseUtility::sendJsonResponse('error', ['message' => 'Authorization header is required'], 401);
             exit;
         }
 
-        $token = $headers['Authorization'];
-        $token = str_replace('Bearer ', '', $token);
-        $token = trim($token);
+        // Remove 'Bearer ' prefix if present
+        $token = preg_replace('/^Bearer\s+/', '', $token);
 
         $validationResult = $this->authenticationService->validateToken($token);
 
