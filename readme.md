@@ -1,7 +1,3 @@
-Perfect! Based on the provided project structure (a PHP REST API backend for **Drophere**), here's a clean and professional `README.md` tailored for that backend repo:
-
----
-
 ```markdown
 # 🚗 Drophere Backend API
 
