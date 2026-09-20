@@ -382,6 +382,7 @@ class RideRepository
         
         return $response;
     }
+    
 
 
 
