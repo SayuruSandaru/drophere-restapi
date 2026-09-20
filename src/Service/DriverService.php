@@ -3,14 +3,17 @@
 namespace App\Service;
 
 use App\Repository\DriverRepository;
+use App\Repository\UserRepository;
 
 class DriverService
 {
     private $driverRepository;
+    private $userRepository;
 
     public function __construct()
     {
         $this->driverRepository = new DriverRepository();
+        $this->userRepository = new UserRepository();
     }
 
     public function createDriver($street, $city, $province, $verificationDoc, $userId)
@@ -42,10 +45,19 @@ class DriverService
     {
         try {
             $driver = $this->driverRepository->getDriverById($driverId);
-            return [
-                'status' => true,
-                'driver' => $driver
-            ];
+            if (!$driver) {
+                return [
+                    'status' => false,
+                    'message' => 'Driver not found'
+                ];
+            } else {
+                $user = $this->userRepository->findById($driver['user_id']);
+                $driver['user'] = $user;
+                return [
+                    'status' => true,
+                    'driver' => $driver
+                ];
+            }
         } catch (\Exception $e) {
             error_log($e->getMessage());
             return [
@@ -88,4 +100,31 @@ class DriverService
             ];
         }
     }
+
+    public function updateDriverStatus($driverId, $status)
+    {
+        try {
+            $result = $this->driverRepository->updateDriverStatus($driverId, $status);
+            if ($result) {
+                return [
+                    'status' => true,
+                    'message' => 'Driver status updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Error updating driver status'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+    
 }

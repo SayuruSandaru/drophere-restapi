@@ -19,10 +19,10 @@ class RideService
         $this->vehicleRepository = new VehicleRepository();
     }
 
-    public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id)
+    public function createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id, $passngerCount)
     {
         try {
-            $res =  $this->rideRepository->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id);
+            $res =  $this->rideRepository->createRide($driver_id, $status, $start_time, $current_location, $route_id, $start_location, $end_location, $vehicle_id, $passngerCount);
             if ($res) {
                 return [
                     'status' => true,
@@ -47,6 +47,22 @@ class RideService
     {
         try {
             $ride = $this->rideRepository->getRideById($ride_id);
+            if (empty($ride)) {
+                return [
+                    'status' => false,
+                    'message' => 'Ride not found'
+                ];
+            }
+            $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
+            $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+            if ($ownerDetails) {
+                $ride['owner_details'] = $ownerDetails;
+            }
+
+            if ($vehicleDetails) {
+                $ride['vehicle_details'] = $vehicleDetails;
+            }
+
             return [
                 'status' => true,
                 'ride' => $ride
@@ -59,6 +75,99 @@ class RideService
             ];
         }
     }
+
+    public function getRideByStatus($status)
+    {
+        try {
+            $rides = $this->rideRepository->getRideByStatus($status);
+            if (count($rides) == 0) {
+                return [
+                    'status' => false,
+                    'message' => 'Ride not found'
+                ];
+            }
+
+            foreach ($rides as $key => $ride) {
+                if (!is_array($ride)) {
+                    continue;
+                }
+                $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
+                if ($ownerDetails) {
+                    $rides[$key]['owner_details'] = $ownerDetails;
+                } else {
+                    $rides[$key]['owner_details'] = 'Driver not found';
+                }
+                $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+                if ($vehicleDetails) {
+                    $rides[$key]['vehicle_details'] = $vehicleDetails;
+                } else {
+                    $rides[$key]['vehicle_details'] = 'Vehicle not found';
+                }
+            }
+
+            return [
+                'status' => true,
+                'rides' => $rides
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to retrieve rides: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateRideStatus($ride_id, $status)
+    {
+        try {
+            $res = $this->rideRepository->updateRideByStatus($ride_id, $status);
+            if ($res) {
+                return [
+                    'status' => true,
+                    'message' => 'Ride status updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Failed to update ride status'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to update ride status: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function deleteRide($ride_id)
+    {
+        try {
+            $res = $this->rideRepository->deleteRide($ride_id);
+            if ($res) {
+                return [
+                    'status' => true,
+                    'message' => 'Ride deleted successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Failed to delete ride'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => 'Failed to delete ride: ' . $e->getMessage()
+            ];
+        }
+    }
+
+
+
 
     public function getAllRides()
     {
@@ -77,7 +186,24 @@ class RideService
         }
     }
 
-    public function searchRides($pickup, $destination)
+    public function getAllRidesByDriverId($driver_id)
+    {
+        try {
+            $rides = $this->rideRepository->getAllRidesByDriver($driver_id);
+            return [
+                'status' => true,
+                'rides' => $rides
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function searchRides($pickup, $destination, $date, $passngerCountr)
     {
         $rides = $this->rideRepository->getAllRides();
         $suggestedRides = [];
@@ -85,24 +211,79 @@ class RideService
         foreach ($rides as $ride) {
             $routePoints = $this->decodePolyline($ride['route']);
 
-            // Check if both pickup and destination points are on the route
             if ($this->isPointOnRoute($pickup, $routePoints) && $this->isPointOnRoute($destination, $routePoints)) {
-                // Fetch ride owner details
                 $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
                 $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+                $fee = $this->rideRepository->calculateFee($pickup, $destination, $vehicleDetails['type']);
                 if ($ownerDetails) {
                     $ride['owner_details'] = $ownerDetails;
                 }
                 if ($vehicleDetails) {
                     $ride['vehicle_details'] = $vehicleDetails;
                 }
-
+                if ($fee) {
+                    $ride['fee'] = $fee['fee'];
+                $ride['individualFee'] = ceil($fee['fee'] / $passngerCountr);
+                $ride['distance'] = $fee['distance'];
+                }
                 $suggestedRides[] = $ride;
+                
             }
         }
-
         return $suggestedRides;
     }
+
+    public function searchRidesByName($pickup, $destination, $date, $passengerCount, $pickupCoordinates, $destinationCoordinates)
+    {
+        $rides = $this->rideRepository->searchByName($pickup, $destination, $date, $passengerCount);
+        $suggestedRides = [];
+        foreach ($rides as $ride) {
+            $ownerDetails = $this->driverRepository->getDriverById($ride['driver_id']);
+            $vehicleDetails = $this->vehicleRepository->getVehicleById($ride['vehicle_id']);
+            $fee = $this->rideRepository->calculateFee($pickupCoordinates, $destinationCoordinates, $vehicleDetails['type']);
+            if ($ownerDetails) {
+                $ride['owner_details'] = $ownerDetails;
+            }
+            if ($vehicleDetails) {
+                $ride['vehicle_details'] = $vehicleDetails;
+            }
+            if ($fee) {
+                $ride['fee'] = $fee['fee'];
+                $ride['individualFee'] = ceil($fee['fee'] / $passengerCount);
+                $ride['distance'] = $fee['distance'];
+            }
+            $suggestedRides[] = $ride;
+        }
+        return $suggestedRides;
+    }
+
+
+
+    public function getDirections($pickup, $destination)
+    {
+        try {
+            $res = $this->rideRepository->getDirections($pickup, $destination);
+            if (empty($res)) {
+                return [
+                    'status' => false,
+                    'message' => 'No directions found'
+                ];
+            } else {
+
+                return [
+                    'status' => true,
+                    'directions' => $res
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
 
     private function decodePolyline($polyline)
     {
@@ -140,7 +321,7 @@ class RideService
         return $points;
     }
 
-    private function isPointOnRoute($point, $routePoints, $tolerance = 100) // tolerance in meters
+    private function isPointOnRoute($point, $routePoints, $tolerance = 100) 
     {
         foreach ($routePoints as $routePoint) {
             if ($this->haversineDistance($point, $routePoint) < $tolerance) {

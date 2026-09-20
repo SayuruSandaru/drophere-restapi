@@ -16,6 +16,9 @@ class DriverRepository
         $this->DB = getDBConnection();
     }
 
+
+
+
     public function registerDriver($street, $city, $province, $proofDocument, $userId)
     {
         try {
@@ -86,7 +89,69 @@ class DriverRepository
             $stmt->execute();
             $result = $stmt->get_result();
             if ($result->num_rows == 0) {
-                throw new Exception("Driver not found");
+                return null;
+            }
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+
+    public function updateDriverStatus($driverId, $status)
+    {
+        try {
+            
+            if (!in_array($status, ['pending', 'accepted', 'rejected', 'suspended'])) {
+                throw new Exception("Invalid status value");
+            }
+    
+            $stmt = $this->DB->prepare("UPDATE drivers SET status = ? WHERE driver_id = ?");
+
+            $stmt->bind_param("si", $status, $driverId);
+            $stmt->execute();
+    
+            if ($stmt->affected_rows === 0) {
+                throw new Exception("No rows updated. Check if the driver exists.");
+            }
+    
+            return ['status' => true, 'message' => 'Driver status updated successfully'];
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            return ['status' => false, 'message' => 'Error updating driver status: ' . $e->getMessage()];
+        }
+    }
+    
+
+
+
+
+    // public function updateDriverStatus($driverId, $status)
+    // {
+    //     try {
+    //         $stmt = $this->DB->prepare("UPDATE drivers SET status = ? WHERE driver_id = ?");
+    //         $stmt->bind_param("si", $status, $driverId);
+    //         $stmt->execute();
+    //         if ($stmt->affected_rows == 0) {
+    //             throw new Exception("No rows affected. Update failed or status is unchanged.");
+    //         }
+    //         return true;
+    //     } catch (\mysqli_sql_exception $e) {
+    //         error_log($e->getMessage());
+    //         throw new Exception($e->getMessage());
+    //     }
+    // }
+
+    public function findByUserId($userId)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM drivers WHERE user_id = ?");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                return null;
             }
             return $result->fetch_assoc();
         } catch (\mysqli_sql_exception $e) {

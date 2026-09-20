@@ -1,11 +1,6 @@
 {
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
-    },
     "require": {
-        "firebase/php-jwt": "^6.4",
-        "aws/aws-sdk-php": "^3.311"
+        "phpmailer/phpmailer": "^6.9",
+        "firebase/php-jwt": "^6.10"
     }
 }

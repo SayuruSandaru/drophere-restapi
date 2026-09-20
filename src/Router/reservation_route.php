@@ -1,0 +1,75 @@
+<?php
+
+use App\Router\Router;
+use App\Middleware\InputValidationMiddleware;
+use App\Controller\ReservationController;
+use App\Middleware\AuthMiddleware;
+
+function registerReservationRoutes(Router $router)
+{
+    $reservationController = new ReservationController();
+    $authMiddleware = new AuthMiddleware();
+    $reservationValidation = new InputValidationMiddleware([
+        'driver_id' => 'required',
+        'ride_id' => 'required',
+        'status' => 'required',
+        'price' => 'required',
+        'passenger_count' => 'required',
+    ]);
+
+
+    $updateStatusValidation = new InputValidationMiddleware([
+        'reservation_id' => 'required',
+        'status' => 'required'
+    ]);
+
+    $router->post('/reservation/create', [$authMiddleware, $reservationValidation], function ($request) use ($reservationController) {
+        $type = "passenger";
+        $reservationController->createPassangerReservation($request, $type);
+    });
+
+    $router->post('/reservation/available', [$authMiddleware], function ($request) use ($reservationController) {
+        $status = $request['status'];
+        $userId = $request['user_id'];
+        $reservationController->getAvailableReservations($status, $userId);
+    });
+
+    $router->post('/reservation/update', [$authMiddleware, $updateStatusValidation], function ($request) use ($reservationController) {
+        $reservationId = $request['reservation_id'];
+        $newStatus = $request['status'];
+        $reservationController->updateReservationStatus($reservationId, $newStatus);
+    });
+
+    $router->get('/reservation/{id}', [$authMiddleware], function ($request, $id) use ($reservationController) {
+        $request['reservationId'] = $id;
+        $reservationController->getReservationById($id);
+    });
+
+    $deliveryReservationValidation = new InputValidationMiddleware([
+        'driver_id' => 'required',
+        'ride_id' => 'required',
+        'status' => 'required',
+        'price' => 'required',
+        'recipient_name' => 'required',
+        'recipient_address' => 'required',
+        'recipient_phone' => 'required',
+        'weight' => 'required',
+    ]);
+
+    $router->post('/reservation/create/delivery', [$authMiddleware, $deliveryReservationValidation], function ($request) use ($reservationController) {
+        $type = "delivery";
+        $reservationController->createDeliveryReservation($request, $type);
+    });
+
+    $router->post('/reservation/update/delivery/signature', [$authMiddleware], function ($request) use ($reservationController) {
+        $reservationId = $request['reservation_id'];
+        $signature = $request['url'];
+        $reservationController->updateDeliverySignature($reservationId, $signature);
+    });
+
+
+    $router->get('/reservation/ride/{id}', [$authMiddleware], function ($request, $id) use ($reservationController) {
+        $request['reservationId'] = $id;
+        $reservationController->getReservationByRideId($id);
+    });
+}

@@ -96,4 +96,27 @@ class DriverController
             );
         }
     }
+
+    public function updateDriverStatus($request)
+    {
+        $driverId = $request['driverId'];
+        $status = $request['status'];
+
+        $res = $this->driverService->updateDriverStatus($driverId, $status);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => $res['message']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                400
+            );
+        }
+    }
+
 }

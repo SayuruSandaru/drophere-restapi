@@ -1,0 +1,273 @@
+<?php
+
+namespace App\Service;
+
+use App\Repository\UserRepository;
+use App\Repository\DriverRepository;
+
+class UserService
+{
+    private $userRepository;
+    private $driverRepository;
+
+    public function __construct()
+    {
+        $this->userRepository = new UserRepository();
+        $this->driverRepository = new DriverRepository();
+    }
+
+    public function addReview($description, $rating, $driver_id, $userId)
+    {
+        try {
+            $review_Id = $this->userRepository->addReview($description, $rating, $driver_id, $userId);
+            if ($review_Id > 0) {
+                return [
+                    'status' => true,
+                    'message' => 'Review added successfully',
+                    'id' => $review_Id
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Failed to add review',
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+    public function getReviewsByDriverId($driver_id)
+    {
+        try {
+            $reviews = $this->userRepository->getReviewsByDriverId($driver_id);
+            return [
+                'status' => true,
+                'reviews' => $reviews
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+
+    // public function getReviewById($review_id)
+    // {
+    //     try {
+    //         $review = $this->userRepository->getReviewById($review_id);
+    //         return [
+    //             'status' => true,
+    //             'review' => $review
+    //         ];
+    //     } catch (\Exception $e) {
+    //         error_log($e->getMessage());
+    //         return [
+    //             'status' => false,
+    //             'message' => $e->getMessage()
+    //         ];
+    //     }
+    // }
+
+    // public function getAllReviews()
+    // {
+    //     try {
+    //         $reviews = $this->userRepository->getAllReviews();
+    //         return [
+    //             'status' => true,
+    //             'reviews' => $reviews
+    //         ];
+    //     } catch (\Exception $e) {
+    //         error_log($e->getMessage());
+    //         return [
+    //             'status' => false,
+    //             'message' => $e->getMessage()
+    //         ];
+    //     }
+    // }
+
+
+
+
+
+    public function getAllUsers()
+    {
+        try {
+            $users = $this->userRepository->getAllUsers();
+            return [
+                'status' => true,
+                'users' => $users
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+    public function getUserById($id)
+    {
+        try {
+            $user = $this->userRepository->findById($id);
+            return ['status' => true, 'user' => $user];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return ['status' => false, 'message' => 'User not found'];
+        }
+    }
+
+
+    public function getUserDetails($id)
+    {
+        try {
+            $user = $this->userRepository->findById($id);
+
+            if (!$user) {
+                return ['status' => false, 'message' => 'User not found'];
+            }
+            $driverDetails = $this->driverRepository->findByUserId($id);
+            if ($driverDetails) {
+                return [
+                    'status' => true,
+                    'user' => $user,
+                    'isDriver' => true,
+                    'driverDetails' => $driverDetails
+                ];
+            } else {
+                return [
+                    'status' => true,
+                    'user' => $user,
+                    'isDriver' => false
+                ];
+            }
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            error_log($e->getMessage());
+            return ['status' => false, 'message' => 'Error retrieving user details'];
+        }
+    }
+
+
+    public function deleteUser($id)
+    {
+        try {
+            // Call the correct method from UserRepository
+            $result = $this->userRepository->deleteUser($id); // Changed here
+            return [
+                'status' => true,
+                'message' => 'User deleted successfully'
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+    public function createDispute($status, $category, $message, $userId)
+    {
+        try {
+            $res =  $this->userRepository->createDispute($userId, $category, $status, $message);
+            if ($res) {
+                return [
+                    'status' => true,
+                    'message' => 'Dispute created successfully'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Error in creating Dispute'
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getAllDisputes()
+    {
+        try {
+            $dispute = $this->userRepository->getAllDisputes();
+            return [
+                'status' => true,
+                'disputes' => $dispute
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getdisputeById($dispute_id)
+    {
+        try {
+            $dispute = $this->userRepository->getdisputeById($dispute_id);
+            return [
+                'status' => true,
+                'dispute' => $dispute
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateStatus($dispute_id, $status)
+    {
+        try {
+            $result = $this->userRepository->updateStatus($dispute_id, $status);
+            return [
+                'status' => true,
+                'message' => 'Dispute status updated successfully'
+            ];
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateUserStatus($user_id, $status)
+{
+    try {
+        $result = $this->userRepository->updateUserStatus($user_id, $status);
+        return [
+            'status' => true,
+            'message' => 'User status updated successfully'
+        ];
+    } catch (\Exception $e) {
+        error_log($e->getMessage());
+        return [
+            'status' => false,
+            'message' => $e->getMessage()
+        ];
+    }
+}
+}
