@@ -34,6 +34,13 @@ function registerReservationRoutes(Router $router)
         $reservationController->getAvailableReservations($status, $userId);
     });
 
+    $router->post('/reservation/available/d', [$authMiddleware], function ($request) use ($reservationController) {
+        $status = $request['status'];
+        $driverId = $request['driver_id'];
+        $reservationController->getAvailableReservationsDriverId($status, $driverId);
+    });
+    
+
     $router->post('/reservation/update', [$authMiddleware, $updateStatusValidation], function ($request) use ($reservationController) {
         $reservationId = $request['reservation_id'];
         $newStatus = $request['status'];
