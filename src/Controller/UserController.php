@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Service\UserService;
 use App\Utility\ResponseUtility;
-
+use Exception;
 class UserController
 {
     private $userService;
@@ -16,10 +16,11 @@ class UserController
 
     public function addReview($request)
     {
+        $userId = $request['userId'];
         $description = $request['description'];
         $rating = $request['rating'];
         $driver_id = $request['driver_id'];
-        $res = $this->userService->addReview($description, $rating, $driver_id);
+        $res = $this->userService->addReview($description, $rating, $driver_id, $userId);
 
         if ($res['status']) {
             ResponseUtility::sendJsonResponse(
@@ -167,4 +168,131 @@ class UserController
             );
         }
     }
+
+    // Delete user by ID
+    public function deleteUser($id)
+    {
+        $res = $this->userService->deleteUser($id);
+    
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => 'User deleted successfully'],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                $res['message'] === 'User not found' ? 404 : 500
+            );
+        }
+    }
+
+
+
+    public function getDisputeById($dispute_id)
+    {
+        $res = $this->userService->getDisputeById($dispute_id);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['dispute' => $res['dispute']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                200
+            );
+        }
+    }
+
+    public function createDispute($request)
+    {
+        $userId = $request['userId'];
+        $status = $request['status'];
+        $category = $request['category'];
+        $message = $request['message'];
+
+        $res = $this->userService->createDispute($status, $category, $message, $userId);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => $res['message']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                200
+            );
+        }
+    }
+
+    public function getAllDisputes()
+    {
+        $res = $this->userService->getAllDisputes();
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['disputes' => $res['disputes']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                500
+            );
+        }
+    }
+
+    public function updateStatus($request)
+    {
+        $dispute_id = $request['dispute_id'];
+        $status = $request['status'];
+
+        $res = $this->userService->updateStatus($dispute_id, $status);
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => "Status updated successfully"],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                500
+            );
+        }
+    }
+
+
+    public function updateUserStatus($request)
+{
+    $user_id = $request['user_id'];
+    $status = $request['status'];
+
+    $res = $this->userService->updateUserStatus($user_id, $status);
+    if ($res['status']) {
+        ResponseUtility::sendJsonResponse(
+            ResponseUtility::STATUS_SUCCESS,
+            ['message' => "User status updated successfully"],
+            200
+        );
+    } else {
+        ResponseUtility::sendJsonResponse(
+            ResponseUtility::STATUS_ERROR,
+            ['message' => $res['message']],
+            500
+        );
+    }
+}
 }

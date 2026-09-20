@@ -22,12 +22,12 @@ class AuthService
         $issuedAt = time();
         $expirationTime = $issuedAt + 3600 * 24 * 30; // Token valid for 30 days
         $payload = array(
-            'userid' => $user['id'],
-            'email' => $user['email'],
-            'firstname' => $user['firstname'],
-            'lastname' => $user['lastname'],
-            'username' => $user['username'],
-            'phone' => $user['phone'],
+            'userid' => $user['id'] ?? null,
+            'email' => $user['email'] ?? null,
+            'firstname' => $user['firstname'] ?? null,
+            'lastname' => $user['lastname'] ?? null,
+            'username' => $user['username'] ?? null,
+            'phone' => $user['phone'] ?? null,
             'iat' => $issuedAt,
             'exp' => $expirationTime
         );
@@ -65,7 +65,7 @@ class AuthService
         if ($decodedPayload !== null && isset($decodedPayload['userid'])) {
             return $decodedPayload['userid'];
         }
-        return null; // Or handle as per your error management strategy
+        return null;
     }
 
     public function login($username, $password)
@@ -73,9 +73,46 @@ class AuthService
         try {
             $user = $this->authenticationRepository->login($username, $password);
             if ($user !== NULL) {
+                if($user['status'] == "Deleted"){
+                    return [
+                        "status" => false,
+                        "message" => "Your account has been deleted"
+                    ];
+                }else if($user['status'] == "Suspended"){
+                    return [
+                        "status" => false,
+                        "message" => "Your account is suspended"
+                    ];
+                }else{
+                    return [
+                        "status" => true,
+                        "user" => $user
+                    ];
+                }
+                
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Invalid username or password"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
+    public function adminLogin($username, $password)
+    {
+        try {
+            $admin = $this->authenticationRepository->adminLogin($username, $password);
+            if ($admin !== NULL) {
                 return [
                     "status" => true,
-                    "user" => $user
+                    "admin" => $admin
                 ];
             } else {
                 return [
@@ -115,4 +152,119 @@ class AuthService
             ];
         }
     }
+
+    public function updateUser($email, $firstname = null, $lastname = null, $username = null, $phone = null, $profile_image = null)
+    {
+        try {
+
+            $fields = [];
+            $params = [];
+            $types = '';
+
+            if ($firstname !== null) {
+                $fields[] = "firstname = ?";
+                $params[] = $firstname;
+                $types .= 's';
+            }
+            if ($lastname !== null) {
+                $fields[] = "lastname = ?";
+                $params[] = $lastname;
+                $types .= 's';
+            }
+            if ($username !== null) {
+                $fields[] = "username = ?";
+                $params[] = $username;
+                $types .= 's';
+            }
+            if ($phone !== null) {
+                $fields[] = "phone = ?";
+                $params[] = $phone;
+                $types .= 's';
+            }
+            if ($profile_image !== null) {
+                $fields[] = "profile_image = ?";
+                $params[] = $profile_image;
+                $types .= 's';
+            }
+
+            if (empty($fields)) {
+                return [
+                    "status" => false,
+                    "message" => "No fields to update"
+                ];
+            }
+            $params[] = $email;
+            $types .= 's';
+
+            $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE email = ?";
+
+            $user = $this->authenticationRepository->updateUser($sql, $types, $params);
+
+            if ($user !== NULL) {
+                return [
+                    "status" => true,
+                    "userId" => $user
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Error in updating user"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
+    public function forgotPassword($email){
+        try {
+            $user = $this->authenticationRepository->forgotPassword($email);
+            if ($user !== NULL) {
+                return [
+                    "status" => true,
+                    "token" => $user
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Error in updating user"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
+    public function resetPassword($password, $token)
+    {
+        try {
+            $user = $this->authenticationRepository->resetPassword($token, $password);
+            if ($user !== NULL) {
+                return [
+                    "status" => true,
+                    "user" => $user
+                ];
+            } else {
+                return [
+                    "status" => false,
+                    "message" => "Error in updating user"
+                ];
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
 }

@@ -83,6 +83,92 @@ class RideController
         }
     }
 
+    public function getAllRidesBydriverId($request)
+    {
+        $driver_id = $request['driver_id'];
+
+        $res = $this->rideService->getAllRidesBydriverId($driver_id);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => $res['rides']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                500
+            );
+        }
+    }
+
+    public function getRideByStatus($request)
+    {
+        $status = $request['status'];
+        $res = $this->rideService->getRideByStatus($status);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => $res['rides']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                404
+            );
+        }
+    }
+
+    public function updateRide($request)
+    {
+        $ride_id = $request['ride_id'];
+        $status = $request['status'];
+
+        $res = $this->rideService->updateRideStatus($ride_id, $status);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => $res['message']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                400
+            );
+        }
+    }
+
+    public function deleteRide($request)
+    {
+        $ride_id = $request['ride_id'];
+
+        $res = $this->rideService->deleteRide($ride_id);
+
+        if ($res['status']) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['message' => $res['message']],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_ERROR,
+                ['message' => $res['message']],
+                400
+            );
+        }
+    }
+
+
+
     public function searchRides($request)
     {
         $pickup = ['lat' => $request['pickup_lat'], 'lng' => $request['pickup_lng']];
@@ -91,6 +177,31 @@ class RideController
         $passenger_count = $request['passenger_count'];
 
         $suggestedRides = $this->rideService->searchRides($pickup, $destination, $date, $passenger_count);
+
+        if (!empty($suggestedRides)) {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => $suggestedRides],
+                200
+            );
+        } else {
+            ResponseUtility::sendJsonResponse(
+                ResponseUtility::STATUS_SUCCESS,
+                ['rides' => []],
+                200
+            );
+        }
+    }
+
+    public function searchRidesByName($request)
+    {
+        $pickup = $request['pickup_name'];
+        $destination = $request['destination_name'];
+        $date = $request['date'];
+        $passenger_count = $request['passenger_count'];
+        $pickupCordinate = ['lat' => $request['pickup_lat'], 'lng' => $request['pickup_lng']];
+        $destinationCoordinate = ['lat' => $request['destination_lat'], 'lng' => $request['destination_lng']];
+        $suggestedRides = $this->rideService->searchRidesByName($pickup, $destination, $date, $passenger_count, $pickupCordinate, $destinationCoordinate);
 
         if (!empty($suggestedRides)) {
             ResponseUtility::sendJsonResponse(

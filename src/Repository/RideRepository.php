@@ -76,6 +76,164 @@ class RideRepository
         }
     }
 
+    public function getAllRidesByDriver($driver_id)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM ride WHERE driver_id = ?");
+            $stmt->bind_param("i", $driver_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Ride not found");
+            }
+
+            $rides = [];
+            while ($row = $result->fetch_assoc()) {
+                $rides[] = $row;
+            }
+
+            return $rides;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function getRideByStatus($status)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM ride WHERE status = ?");
+            $stmt->bind_param("s", $status);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Ride not found");
+            }
+
+            $rides = [];
+            while ($row = $result->fetch_assoc()) {
+                $rides[] = $row;
+            }
+
+            return $rides;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function updateRideByStatus($ride_id, $status)
+    {
+        try {
+            $stmt = $this->DB->prepare("UPDATE ride SET status = ? WHERE ride_id = ?");
+            $stmt->bind_param("si", $status, $ride_id);
+            $stmt->execute();
+            if ($stmt->affected_rows == 0) {
+                throw new Exception("Error updating ride status: No rows affected.");
+            }
+            return [
+                'status' => true,
+                'message' => 'Ride status updated successfully'
+            ];
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function updateBookedSeats($ride_id, $booked_seat)
+    {
+        try {
+            $stmt = $this->DB->prepare("UPDATE ride SET booked_seat = ? WHERE ride_id = ?");
+            
+            $stmt->bind_param("ii", $booked_seat, $ride_id);
+            $stmt->execute(); 
+            
+            if ($stmt->affected_rows == 0) {
+                throw new Exception("Error updating booked seats: No rows affected.");
+            }
+            
+            return true;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+    
+
+
+    public function searchByName($pickup, $destination, $date, $passengerCount)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT * FROM ride 
+                                    WHERE start_location = ? 
+                                      AND end_location = ? 
+                                      AND DATE(start_time) = ? 
+                                      AND passenger_count >= ? 
+                                      AND status = 'active'");
+            $stmt->bind_param("sssi", $pickup, $destination, $date, $passengerCount);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $rides = [];
+            while ($row = $result->fetch_assoc()) {
+                $rides[] = $row;
+            }
+            return $rides;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+
+
+
+    public function deleteRide($ride_id)
+    {
+        try {
+            $stmt = $this->DB->prepare("DELETE FROM ride WHERE ride_id = ?");
+            $stmt->bind_param("i", $ride_id);
+            $stmt->execute();
+            if ($stmt->affected_rows == 0) {
+                throw new Exception("Error deleting ride: No rows affected.");
+            }
+            return [
+                'status' => true,
+                'message' => 'Ride deleted successfully'
+            ];
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+
+
     public function getRideById($ride_id)
     {
         try {
@@ -117,6 +275,8 @@ class RideRepository
             throw new Exception("Error searching for rides: " . $e->getMessage());
         }
     }
+
+
 
 
 
@@ -186,27 +346,44 @@ class RideRepository
         return $earthRadius * $c;
     }
 
+    public function getFees($type)
+    {
+        try {
+            $stmt = $this->DB->prepare("SELECT price_per_km FROM vehicle_fees WHERE vehicle_type = ?");
+
+            if ($stmt === false) {
+                throw new Exception("Failed to prepare SQL statement: " . $this->DB->error);
+            }
+
+            $stmt->bind_param("s", $type);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 0) {
+                throw new Exception("Vehicle type not found");
+            }
+            return $result->fetch_assoc();
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+
     public function calculateFee($pickup, $destination, $vehicleType)
     {
         $distance = $this->getRoadDistance($pickup, $destination);
-        $fee = 0;
-        if ($vehicleType == 'bike') {
-            $fee = $distance * 5;
-        } else if ($vehicleType == 'tuktuk') {
-            $fee = $distance * 15;
-        } else if ($vehicleType == 'car') {
-            $fee = $distance * 20;
-        } else if ($vehicleType == 'van') {
-            $fee = $distance * 25;
-        } else {
-            $fee = $distance * 30;
-        }
+        $charge = $this->getFees($vehicleType);
+        $fee = $charge['price_per_km'] * $distance;
+        $round = ceil($fee);
         $response = [
-            'fee' => $fee,
+            'fee' => $round,
             'distance' => $distance
         ];
+        
         return $response;
     }
+
+
 
     public function getDirections($pickup, $destination)
     {
@@ -261,12 +438,11 @@ class RideRepository
             throw new Exception("Error fetching routes polylines: No polyline data in response");
         }
     }
-
+  
 
     private function getRoadDistance($pickup, $destination)
     {
         $url = 'https://routes.googleapis.com/directions/v2:computeRoutes?key=AIzaSyDPVTj_4pkQwV9t2ylExQpFixYFsFd55ac';
-
         $data = array(
             "origin" => array(
                 "location" => array(
@@ -291,21 +467,24 @@ class RideRepository
         $options = array(
             'http' => array(
                 'header'  => "Content-Type: application/json\r\n" .
-                    "X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline\r\n",
+                    "X-Goog-FieldMask: routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline",
                 'method'  => 'POST',
                 'content' => json_encode($data),
-                'follow_location' => true,
+                'ignore_errors' => true
             ),
         );
 
         $context  = stream_context_create($options);
         $response = file_get_contents($url, false, $context);
-
         if ($response === FALSE) {
             throw new Exception("Error fetching road distance.");
         }
 
         $data = json_decode($response, true);
+
+        if (isset($data['error'])) {
+            throw new Exception("Error fetching road distance: " . $data['error']['message']);
+        }
 
         if (isset($data['routes'][0]['distanceMeters'])) {
             $distance = $data['routes'][0]['distanceMeters'] / 1000; // Convert meters to kilometers

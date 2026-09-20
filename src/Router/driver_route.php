@@ -31,4 +31,12 @@ function registerDriverRoutes(Router $router)
     $router->post('/driver/user', [$authMiddleware], function ($request) use ($driverController) {
         $driverController->getDriverByUserId($request);
     });
+
+    $router->put('/driver/{driverId}/status', [$authMiddleware], function ($request, $driverId) use ($driverController) {
+        $request['driverId'] = $driverId;  
+        $driverController->updateDriverStatus($request);
+    });
 }
+
+
+

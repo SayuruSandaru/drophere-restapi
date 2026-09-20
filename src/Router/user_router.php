@@ -53,4 +53,38 @@ function registerUserRouter(Router $router)
         $id = $request['userId'];
         $userController->getUserDetails($id);
     });
+
+    $router->delete('/users/delete/{id}', [$authMiddleware], function ($request, $id) use ($userController) {
+        $userController->deleteUser($id);
+    });
+
+    $router->post('/user/status', [$authMiddleware], function ($request) use ($userController) {
+        $userController->updateUserStatus($request);
+    });
+    
+
+
+    // Instantiate the necessary controller and middleware
+    $userController = new UserController();
+    $authMiddleware = new AuthMiddleware();
+    $rideValidation = new InputValidationMiddleware([
+        'category' => 'required',
+        'status' => 'required',
+        'message' => 'required',
+
+    ]);
+
+    $router->post('/user/dispute/create', [$authMiddleware, $rideValidation], function ($request) use ($userController) {
+        $userController->createDispute($request);
+    });
+
+    $router->get('/user/dispute/{disputeId}', [$authMiddleware], function ($request, $disputeId) use ($userController) {
+        $userController->getDisputeById($disputeId);
+    });
+    $router->get('/user/disputes', [$authMiddleware], function ($request) use ($userController) {
+        $userController->getAllDisputes();
+    });
+    $router->post('/user/dispute/status', [$authMiddleware], function ($request) use ($userController) {
+        $userController->updateStatus($request);
+    });
 }
